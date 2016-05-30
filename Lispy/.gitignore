@@ -1,0 +1,10 @@
+*.o
+*.out
+*.exe
+*.lib
+*.a
+*.db
+*.ilk
+*.pdb
+*.sdf
+build/
