@@ -10,7 +10,6 @@ set(core_files
     tokens.hh
     variant.hh
     env.cc
-    eval.cc
     lex.cc
     lib.cc
     parse.cc
@@ -21,3 +20,5 @@ add_executable(drift_scheme_test
     main.cc)
     
 set_property(TARGET drift_scheme_test PROPERTY CXX_STANDARD 14)
+
+configure_file(test.scm test.scm COPYONLY)
