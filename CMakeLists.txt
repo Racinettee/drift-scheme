@@ -1,0 +1,23 @@
+cmake_minimum_required (VERSION 3.0)
+project(drift-scheme-test)
+set(CXX_STANDARD_REQUIRED ON)
+
+set(core_files
+    cmd.hh
+    env.hh
+    lex.hh
+    lib.hh
+    tokens.hh
+    variant.hh
+    env.cc
+    eval.cc
+    lex.cc
+    lib.cc
+    parse.cc
+    variant.cc)
+    
+add_executable(drift_scheme_test
+    ${core_files}
+    main.cc)
+    
+set_property(TARGET drift_scheme_test PROPERTY CXX_STANDARD 14)
