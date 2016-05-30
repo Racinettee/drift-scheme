@@ -1,5 +1,6 @@
 *.o
 *.out
+*.obj
 *.exe
 *.lib
 *.a
@@ -7,4 +8,7 @@
 *.ilk
 *.pdb
 *.sdf
+*.tlog
+*.log
+*.ilk
 build/
