@@ -10,7 +10,6 @@ set(core_files
     tokens.hh
     variant.hh
     env.cc
-    eval.cc
     lex.cc
     lib.cc
     parse.cc
