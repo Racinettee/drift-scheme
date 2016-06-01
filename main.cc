@@ -23,6 +23,7 @@ int main() try
 	lexer lex;
 	lex.add_keyword("define");
 	lex.add_keyword("set");
+	lex.add_keyword("lambda");
 	token_array test_tokens = lex.lex_file("test.scm"); //lex.lex_string("(print \"Hello from drift::lisp \" (* 2 1234) \" \" (if 0 \"and good tidings\" \"not!\"))(+ 1 2 3 4 5)(print (+ x 101)");
 	//"(+ 1 2 3)(+ 2 3 4)(+ 1 2 3 (+ 2 3 4))(if 0 \"One\" \"Zero\")");
 	environment env = std_env();

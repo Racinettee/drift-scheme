@@ -10,10 +10,15 @@ namespace lispy
 	struct environment
 	{
 		environment() = default;
+		environment(environment* parent) : parent(parent) { }
 		environment(environment&&);
 		std::map<string, variant_ptr> symbols;
 		std::map<string, std::function<variant_ptr(const lispy::array&)>> user_fn;
-		variant_ptr lookup(const string& name) { return symbols[name]; }
+		environment* parent = nullptr;
+		variant_ptr lookup(const string& name) {
+			
+			return symbols[name];
+		}
 		void add_function(const std::string& n, std::function<variant_ptr(const lispy::array&)> f);
 	};
 	environment std_env();

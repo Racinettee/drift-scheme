@@ -8,3 +8,5 @@
 (println "Value of pi: " pi)
 (set! megaman "Cutboy")
 (println "Mega man changed his name to: " megaman)
+(define lam (lambda (x) (print "I'm on the lam")))
+(lam)

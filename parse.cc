@@ -60,7 +60,6 @@ namespace lispy
 			case RParen:
 				throw expr_over();
 			default:
-				//--num_args;
 				return parse_element(fn, tok_array, ++pos, num_args);
 			}
 		}
@@ -106,8 +105,7 @@ namespace lispy
 			case '*':
 				return std::make_shared<variant>([values]() {
 					auto initial = values.at(0) * values.at(1);
-					//for (auto val : values)
-					for (int i = 2; i < values.size(); i++)
+					for (size_t i = 2; i < values.size(); i++)
 						initial = initial * values[i];
 					return initial;
 				});
@@ -119,7 +117,9 @@ namespace lispy
 			size_t num_args = 0;
 			if (first_tok.second->value_string == "set")
 				optional(Not, tok_array, pos);
-			bool will_lookup = !(first_tok.second->value_string == "define" || first_tok.second->value_string == "set");
+			bool will_lookup = !(first_tok.second->value_string == "define" ||
+								 first_tok.second->value_string == "set" ||
+								 first_tok.second->value_string == "lambda");
 
 			lispy::array values;
 			try
@@ -190,6 +190,16 @@ namespace lispy
 					return symbols[values[0]->value_string] = values[1];
 				});
 			}
+			else if (first_tok.second->value_string == "lambda")
+			{
+				if (num_args != 2)
+					throw invalid_argument(string("lambda expects 2 argument but got: ") + to_string(num_args));
+				
+				auto new_env = make_shared<environment>(fn->env);
+				return make_shared<variant>([new_env, values]() -> variant_ptr {
+					return values[1]->value_function();
+				});
+			}
 			return make_shared<variant>(variant::null_kind());
 		}
 		static variant_ptr parse_fn_call_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
@@ -207,11 +217,15 @@ namespace lispy
 			auto env = fn->env;
 			auto name = first_tok.second->value_string;
 			return make_shared<variant>([env, name, values]()->variant_ptr{
-				auto sym = env->user_fn.find(name);
-				if (sym != env->user_fn.end())
-					return sym->second(values);
-				else
-					throw invalid_argument(string("Tried to call non existent function ") + name);
+				auto user_sym = env->user_fn.find(name);
+				if (user_sym != env->user_fn.end())
+					return user_sym->second(values);
+				
+				auto scm_sym = env->symbols.find(name);
+				if (scm_sym != env->symbols.end())
+					return scm_sym->second->value_function();
+				
+				throw invalid_argument(string("Tried to call non existent function ") + name);
 			});
 		}
 		static variant_ptr parse_expr(method* fn, const token_array& tok_array, size_t& pos)
