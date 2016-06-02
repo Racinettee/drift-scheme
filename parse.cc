@@ -192,12 +192,16 @@ namespace lispy
 			}
 			else if (first_tok.second->value_string == "lambda")
 			{
-				if (num_args != 2)
-					throw invalid_argument(string("lambda expects 2 argument but got: ") + to_string(num_args));
+				if (num_args < 2)
+					throw invalid_argument(string("lambda expects at least 2 argument but got: ") + to_string(num_args));
 				
 				auto new_env = make_shared<environment>(fn->env);
 				return make_shared<variant>([new_env, values]() -> variant_ptr {
-					return values[1]->value_function();
+					//return values[1]->value_function();
+					for(size_t i = 1; i < values.size()-1; i++)
+						values[i]->value_function();
+					auto& value = values.back();
+					return (value->variant_kind == variant::kind_function ? value->value_function() : value);
 				});
 			}
 			return make_shared<variant>(variant::null_kind());
@@ -250,6 +254,10 @@ namespace lispy
 				case Identifier:
 					result = parse_fn_call_expr(first_tok, fn, tok_array, pos);
 				case LThan:
+					break;
+				case RParen:
+					// We got an empty set of paren's
+					pos--;
 					break;
 				}
 			}

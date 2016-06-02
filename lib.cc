@@ -23,6 +23,8 @@ namespace lispy
 				case variant::kind::kind_double:
 					printf("%f", v->value_double);
 					break;
+				case variant::kind::kind_null:
+					printf("<null>");
 				}
 			}
 			return make_shared<variant>(variant::null_kind());
