@@ -139,12 +139,13 @@ namespace lispy
 					switch(cond.variant_kind)
 					{
 					case variant::kind::kind_function:
-						if (cond.value_function()->value_bool)
-							return values[1];
-						else
-							return values[2];
+					{
+						auto& value = (cond.value_function()->value_bool ? values[1] : values[2]);
+						return value->variant_kind == variant::kind_function ? value->value_function() : value;
+					}
 					case variant::kind::kind_int: case variant::kind::kind_bool:
-						return cond.value_bool ? values[1] : values[2];
+						auto& value = (cond.value_bool ? values[1] : values[2]);
+						return value->variant_kind == variant::kind_function ? value->value_function() : value;
 					}
 					// Only the explicit value of 0 or false can be used to evaluate false
 					return make_shared<variant>(true);
@@ -199,7 +200,18 @@ namespace lispy
 				return make_shared<variant>([new_env, values]() -> variant_ptr {
 					//return values[1]->value_function();
 					for(size_t i = 1; i < values.size()-1; i++)
-						values[i]->value_function();
+						if(values[i]->variant_kind == variant::kind_function)
+							values[i]->value_function();
+					auto& value = values.back();
+					return (value->variant_kind == variant::kind_function ? value->value_function() : value);
+				});
+			}
+			else if (first_tok.second->value_string == "begin")
+			{
+				return make_shared<variant>([values]() -> variant_ptr {
+					for(size_t i = 0; i < values.size()-1; i++)
+						if(values[i]->variant_kind == variant::kind_function)
+							values[i]->value_function();
 					auto& value = values.back();
 					return (value->variant_kind == variant::kind_function ? value->value_function() : value);
 				});

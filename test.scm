@@ -1,12 +1,15 @@
 (println "Here's the sum of 1 2 3 and 4 + x from c++: " (+ 1 2 3 4 x))
 (println "If you pass zero to the if statemnent you'll see blarg, else just arg: " (if 1 "arg" "blarg"))
 (define megaman "MY name is megaman")
-(println "Our friend mega man's name is: " megaman)
 (println "Mega man's phrase twice: " (* megaman 2))
-(println "Value of pi: " pi)
 (set! megaman "Cutboy")
 (println "Mega man changed his name to: " megaman)
 (define lam (lambda ()
 	(print "I'm on the lam")
 	(println ". I don't give a dam.")))
 (lam)
+(if 0
+	(println "Single statement")
+	(begin
+		(println "This is the else statement")
+		(println "It has multiple statements")))
