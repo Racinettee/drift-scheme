@@ -55,6 +55,12 @@ namespace lispy
 
 		static string kind_str(kind);
 	};
+	template <typename... Args>
+	auto make_variant(Args&&... args) ->
+	decltype(std::make_shared<variant>(std::forward<Args>(args)...))
+	{
+		return std::make_shared<variant>(std::forward<Args>(args)...);
+	}
 
 	variant_ptr operator+(variant_ptr, variant_ptr);
 	variant_ptr operator*(variant_ptr, variant_ptr);

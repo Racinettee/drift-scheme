@@ -9,10 +9,13 @@ namespace lispy
 {
 	namespace
 	{
+		// Thrown if a token was expected but something else was found
 		struct unexpected_token : public invalid_argument
 		{
 			unexpected_token(const string& msg) : invalid_argument("Unexpected token: " + msg) { }
 		};
+		// Thrown in the case that a parsed expression is found to be over but we were parsing elements
+		struct expr_over : exception { };
 		// Asserts that the token expected is present and increments the pointer
 		static void expect_fn(token_type tok_ty, const token_array& tok_array, size_t& ptr, const std::string& message)
 		{
@@ -26,6 +29,7 @@ namespace lispy
 				throw unexpected_token("expected: " + token_string(tok_ty) + " but caught out of bounds exception" + e.what());
 			}
 		}
+		// Meant only for optional syntax
 		inline static void optional(token_type tok_ty, const token_array& tok_array, size_t& ptr)
 		{
 			if (tok_ty == tok_array.at(ptr).first)
@@ -34,7 +38,6 @@ namespace lispy
 #define expect(tok, exparry, ptr, msg) expect_fn(tok, exparry, ptr, string(msg)+" "+string(__FILE__)+":"+std::to_string(__LINE__))
 
 		static variant_ptr parse_expr(method* fn, const token_array& tok_array, size_t& pos);
-		struct expr_over : exception { };
 		static variant_ptr parse_element(method* fn, const token_array& tok_array, size_t& pos, size_t& num_args, bool lookup_identifiers = true)
 		{
 			while (tok_array.at(pos).first == Quote) pos++;
@@ -48,7 +51,7 @@ namespace lispy
 			{
 				string identifier = tok.second->value_string;
 				environment* env = fn->env;
-				return (lookup_identifiers ? make_shared<variant>([env, identifier]()->variant_ptr {
+				return (lookup_identifiers ? make_variant([env, identifier]()->variant_ptr {
 					return env->lookup(identifier);
 				}) : tok.second);
 			}
@@ -98,19 +101,19 @@ namespace lispy
 			switch (first_tok.second->value_char)
 			{
 			case '+':
-				return std::make_shared<variant>([values]() {
+				return make_variant([values]() {
 					return std::accumulate(values.begin(), values.end(),
-						(values.front()->variant_kind == variant::kind_string ? make_shared<variant>(std::string("")) : make_shared<variant>(0LL)));
+						(values.front()->variant_kind == variant::kind_string ? make_variant(std::string("")) : make_variant(0LL)));
 				});
 			case '*':
-				return std::make_shared<variant>([values]() {
+				return make_variant([values]() {
 					auto initial = values.at(0) * values.at(1);
 					for (size_t i = 2; i < values.size(); i++)
 						initial = initial * values[i];
 					return initial;
 				});
 			}
-			return make_shared<variant>(variant::null_kind());
+			return make_variant(variant::null_kind());
 		}
 		static variant_ptr parse_kw_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
 		{
@@ -134,7 +137,7 @@ namespace lispy
 			{
 				if (num_args != 3)
 					throw invalid_argument(string("Expected 3 arguments, but got ") + to_string(num_args));
-				return make_shared<variant>([values]() -> shared_ptr<variant> {
+				return make_variant([values]() -> variant_ptr {
 					auto& cond = *values[0];
 					switch(cond.variant_kind)
 					{
@@ -144,11 +147,13 @@ namespace lispy
 						return value->variant_kind == variant::kind_function ? value->value_function() : value;
 					}
 					case variant::kind::kind_int: case variant::kind::kind_bool:
+					{
 						auto& value = (cond.value_bool ? values[1] : values[2]);
 						return value->variant_kind == variant::kind_function ? value->value_function() : value;
 					}
+					}
 					// Only the explicit value of 0 or false can be used to evaluate false
-					return make_shared<variant>(true);
+					return make_variant(true);
 				});
 			}
 			else if(first_tok.second->value_string == "define")
@@ -157,7 +162,7 @@ namespace lispy
 					throw invalid_argument(string("define expects 2 arguments, but got ") + to_string(num_args));
 				
 				auto env = fn->env;
-				return make_shared<variant>([env, values]() -> variant_ptr {
+				return make_variant([env, values]() -> variant_ptr {
 					// values[0] should be an identifier, values[1] will be its value
 					if (values[0]->variant_kind != variant::kind_string)
 						throw invalid_argument(string("define expects an identifier as its first arg but got: ") +
@@ -179,7 +184,7 @@ namespace lispy
 					throw invalid_argument(string("set expects 2 arguments, but got ") + to_string(num_args));
 
 				auto env = fn->env;
-				return make_shared<variant>([env, values]() -> variant_ptr {
+				return make_variant([env, values]() -> variant_ptr {
 					if (values[0]->variant_kind != variant::kind_string)
 						throw invalid_argument("set expects an identifier as its first arg but got: " + variant::kind_str(values[0]->variant_kind));
 
@@ -197,7 +202,7 @@ namespace lispy
 					throw invalid_argument(string("lambda expects at least 2 argument but got: ") + to_string(num_args));
 				
 				auto new_env = make_shared<environment>(fn->env);
-				return make_shared<variant>([new_env, values]() -> variant_ptr {
+				return make_variant([new_env, values]() -> variant_ptr {
 					//return values[1]->value_function();
 					for(size_t i = 1; i < values.size()-1; i++)
 						if(values[i]->variant_kind == variant::kind_function)
@@ -208,7 +213,7 @@ namespace lispy
 			}
 			else if (first_tok.second->value_string == "begin")
 			{
-				return make_shared<variant>([values]() -> variant_ptr {
+				return make_variant([values]() -> variant_ptr {
 					for(size_t i = 0; i < values.size()-1; i++)
 						if(values[i]->variant_kind == variant::kind_function)
 							values[i]->value_function();
@@ -216,7 +221,7 @@ namespace lispy
 					return (value->variant_kind == variant::kind_function ? value->value_function() : value);
 				});
 			}
-			return make_shared<variant>(variant::null_kind());
+			return make_variant(variant::null_kind());
 		}
 		static variant_ptr parse_fn_call_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
 		{
@@ -232,7 +237,7 @@ namespace lispy
 
 			auto env = fn->env;
 			auto name = first_tok.second->value_string;
-			return make_shared<variant>([env, name, values]()->variant_ptr{
+			return make_variant([env, name, values]()->variant_ptr{
 				auto user_sym = env->user_fn.find(name);
 				if (user_sym != env->user_fn.end())
 					return user_sym->second(values);

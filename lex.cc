@@ -22,17 +22,17 @@ namespace lispy
 			";", ":",
 			"(", ")", "{", "}", "[", "]",
 			",", "\" or '",
-			"abc_123", "<", ">", "== or !=",
+			"eg. abc_123", "<", ">", "== or !=",
 			"|,&,^", "// testing", "/* testing */",
 			"null",
 			"!"
 		};
 	}
-	const std::string token_string(token_type t)
+	const string token_string(token_type t)
 	{
-		return std::string(tok_string[(int)t]);
+		return string(tok_string[(int)t]);
 	}
-void lexer::add_keyword(const std::string& s)
+void lexer::add_keyword(const string& s)
 {
 	token_key[s] = token_type::Keyword;
 }
@@ -80,7 +80,7 @@ token_array lexer::lex_file(const string& s)
 	ifstream input(s);
 
 	if(!input.is_open())
-		throw(std::runtime_error(std::string("Could not open file")+s));
+		throw(runtime_error(string("Could not open file")+s));
 
 	return lex_input(input);
 }
@@ -140,11 +140,11 @@ void lexer::lex_number(istream& input, token_array& tok_array)
 	switch(tok_type)
 	{
 	case token_type::Int:
-		tok_value = make_shared<variant>(stoll(number));
+		tok_value = make_variant(stoll(number));
 		break;
 	case token_type::Float:
 	case token_type::Num:
-		tok_value = make_shared<variant>(stod(number));
+		tok_value = make_variant(stod(number));
 		break;
 	}
 	tok_array.emplace_back(tok_type, tok_value);
@@ -152,18 +152,14 @@ void lexer::lex_number(istream& input, token_array& tok_array)
 
 void lexer::lex_identifier(istream& input, token_array& tok_array)
 {
-	string keywd_or_ident = "";
+	// This variable represents a string or an identifier
+	string keywd_ident = "";
 
 	// Underscores are valid in identifiers
 	while (isalnum(input.peek()) || input.peek() == '_')
-		keywd_or_ident += input.get();
-
-	if (token_key.find(keywd_or_ident) != token_key.end())
-		// Push a token keyword
-		tok_array.emplace_back(token_key[keywd_or_ident], make_shared<variant>(keywd_or_ident));
-	// else, an identifier
-	else
-		tok_array.emplace_back(token_type::Identifier, make_shared<variant>(keywd_or_ident));
+		keywd_ident += input.get();
+	
+	tok_array.emplace_back(token_key.find(keywd_ident) != token_key.end() ? token_key[keywd_ident] : token_type::Identifier, make_variant(keywd_ident));
 }
 
 int lexer::lex_syntax(istream& input, token_array& tok_array)
@@ -185,22 +181,22 @@ int lexer::lex_syntax(istream& input, token_array& tok_array)
 	{
 		if (syntax=="\"" || syntax=="'")
 		{
-			tok_array.emplace_back(token_type::Quote, make_shared<variant>((unsigned char)syntax[0]));
+			tok_array.emplace_back(token_type::Quote, make_variant((unsigned char)syntax[0]));
 
 			std::string output = "";
 			while (!input.eof() && input.peek() != syntax[0])
 				output += input.get();
 
-			tok_array.emplace_back(token_type::Str, make_shared<variant>(output));
+			tok_array.emplace_back(token_type::Str, make_variant(output));
 
 			if (input.peek() == syntax[0])
-				tok_array.emplace_back(token_type::Quote, make_shared<variant>((unsigned char)input.get()));
+				tok_array.emplace_back(token_type::Quote, make_variant((unsigned char)input.get()));
 			else
 				printf("Unterminated string, expecting: %s", syntax.c_str());
 		}
 		else
 		{
-			tok_array.emplace_back(token_key[syntax], make_shared<variant>((unsigned char)syntax[0]));
+			tok_array.emplace_back(token_key[syntax], make_variant((unsigned char)syntax[0]));
 		}
 		return 0;
 	}
@@ -213,10 +209,10 @@ void lexer::lex_string(std::istream& input, token_array& tok_array, char end_cha
 	while (input.peek() != end_char)
 		output += input.get();
 
-	tok_array.emplace_back(token_type::Str, make_shared<variant>(output));
+	tok_array.emplace_back(token_type::Str, make_variant(output));
 
 	if (input.peek() == end_char)
-		tok_array.emplace_back(token_type::Quote, make_shared<variant>((unsigned char)input.get()));
+		tok_array.emplace_back(token_type::Quote, make_variant((unsigned char)input.get()));
 }
 
 bool lexer::is_whitespace(char space)
@@ -224,11 +220,9 @@ bool lexer::is_whitespace(char space)
 	switch (space)
 	{
 	case ' ':
+	case '\r':
 	case '\n':
 	case '\t':
-	case 0: // NULL
-	case 3: // End of text
-	case 4: // end of transmission
 		return true;
 	}
 	return false;
