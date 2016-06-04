@@ -183,7 +183,7 @@ int lexer::lex_syntax(istream& input, token_array& tok_array)
 		{
 			tok_array.emplace_back(token_type::Quote, make_variant((unsigned char)syntax[0]));
 
-			std::string output = "";
+			string output = "";
 			while (!input.eof() && input.peek() != syntax[0])
 				output += input.get();
 
@@ -205,7 +205,7 @@ int lexer::lex_syntax(istream& input, token_array& tok_array)
 }
 void lexer::lex_string(std::istream& input, token_array& tok_array, char end_char)
 {
-	std::string output = "";
+	string output = "";
 	while (input.peek() != end_char)
 		output += input.get();
 

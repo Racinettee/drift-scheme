@@ -67,27 +67,4 @@ namespace lispy
 				std::putc(value.second->value_char, stdout);
 		}
 	}
-	#ifdef DEBUG
-	inline void token_dump(const token_array& tokens, int highlight = -1)
-	{
-		puts("Token dump: ");
-		if(tokens.size() == 0)
-			throw std::runtime_error("Token array was empty");
-		for(unsigned int i = 0; i < tokens.size(); i++)
-		{
-			if(highlight != -1 && highlight == i)
-			{
-				// ...
-				std::cout << ">> ";
-				print_token(tokens[i]);
-				std::cout << " <<\n";
-			}
-			else
-			{
-				print_token(tokens[i]);
-				std::cout << std::endl;
-			}
-		}
-	}
-	#endif
 }

@@ -30,10 +30,10 @@ namespace lispy
 			value_string.string::~string();
 			break;
 		case kind_array:
-			value_array.~vector<shared_ptr<variant>>();
+			value_array.~vector<variant_ptr>();
 			break;
 		case kind_table:
-			value_table.~map<string, shared_ptr<variant>>();
+			value_table.~map<string, variant_ptr>();
 			break;
 		case kind_function:
 			value_function.~function<variant_ptr()>();
@@ -52,11 +52,11 @@ namespace lispy
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_shared<variant>(l->value_int + r->value_int);
+				return make_variant(l->value_int + r->value_int);
 			case variant::kind::kind_double:
-				return make_shared<variant>(l->value_int + static_cast<long long>(r->value_double));
+				return make_variant(l->value_int + static_cast<long long>(r->value_double));
 			case variant::kind::kind_string:
-				return make_shared<variant>(l->value_int + stoll(r->value_string));
+				return make_variant(l->value_int + stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l + r->value_function();
 			}
@@ -65,11 +65,11 @@ namespace lispy
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_shared<variant>(l->value_string + to_string(r->value_int));
+				return make_variant(l->value_string + to_string(r->value_int));
 			case variant::kind::kind_double:
-				return make_shared<variant>(l->value_string + to_string(r->value_double));
+				return make_variant(l->value_string + to_string(r->value_double));
 			case variant::kind::kind_string:
-				return make_shared<variant>(l->value_string + r->value_string);
+				return make_variant(l->value_string + r->value_string);
 			}
 		case variant::kind::kind_function:
 				// Recurse to get the function evaluated and eventually get to a concrete value to add
@@ -85,20 +85,20 @@ namespace lispy
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_shared<variant>(l->value_int * r->value_int);
+				return make_variant(l->value_int * r->value_int);
 			case variant::kind::kind_double:
-				return make_shared<variant>(l->value_int * static_cast<long long>(r->value_double));
+				return make_variant(l->value_int * static_cast<long long>(r->value_double));
 			case variant::kind::kind_string:
 				try
 				{
-					return make_shared<variant>(l->value_int * stoll(r->value_string));
+					return make_variant(l->value_int * stoll(r->value_string));
 				}
 				catch (invalid_argument&)
 				{
 					string result = "";
 					for (int i = 0; i < l->value_int; i++)
 						result += r->value_string;
-					return make_shared<variant>(result);
+					return make_variant(result);
 				}
 				break;
 			case variant::kind_function:
@@ -113,12 +113,12 @@ namespace lispy
 				string result = "";
 				for (int i = 0; i < r->value_int; i++)
 					result += l->value_string;
-				return make_shared<variant>(result);
+				return make_variant(result);
 			}
 			case variant::kind::kind_double:
-				return make_shared<variant>(variant::null_kind());
+				return make_variant(variant::null_kind());
 			case variant::kind::kind_string:
-				return make_shared<variant>(variant::null_kind());
+				return make_variant(variant::null_kind());
 			case variant::kind_function:
 				return l * r->value_function();
 			}

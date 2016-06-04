@@ -102,8 +102,8 @@ namespace lispy
 			{
 			case '+':
 				return make_variant([values]() {
-					return std::accumulate(values.begin(), values.end(),
-						(values.front()->variant_kind == variant::kind_string ? make_variant(std::string("")) : make_variant(0LL)));
+					return accumulate(values.begin(), values.end(),
+						(values.front()->variant_kind == variant::kind_string ? make_variant(string("")) : make_variant(0LL)));
 				});
 			case '*':
 				return make_variant([values]() {
