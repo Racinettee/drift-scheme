@@ -5,14 +5,14 @@ namespace lispy
 {
 	namespace lib
 	{
-		variant_ptr print(const lispy::array& values)
+		variant_ptr print(const lispy::list& values)
 		{
 			for (auto v : values)
 			{
 				switch (v->variant_kind)
 				{
 				case variant::kind::kind_function:
-					print({ v->value_function() });
+					print({ v->value_function({}) });
 					break;
 				case variant::kind::kind_int:
 					printf("%lli", v->value_int);
@@ -29,7 +29,7 @@ namespace lispy
 			}
 			return make_shared<variant>(variant::null_kind());
 		}
-		variant_ptr println(const lispy::array& values)
+		variant_ptr println(const lispy::list& values)
 		{
 			auto r = print(values);
 			std::putc('\n', stdout);

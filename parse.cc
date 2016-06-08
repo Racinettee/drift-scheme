@@ -50,9 +50,8 @@ namespace lispy
 			case Identifier:
 			{
 				string identifier = tok.second->value_string;
-				environment* env = fn->env;
-				return (lookup_identifiers ? make_variant([env, identifier]()->variant_ptr {
-					return env->lookup(identifier);
+				return (lookup_identifiers ? make_variant([fn, identifier](const list&) {
+					return fn->env->lookup(identifier);
 				}) : tok.second);
 			}
 			case LParen:
@@ -88,7 +87,7 @@ namespace lispy
 		{
 			size_t num_args = 0;
 
-			lispy::array values;
+			lispy::list values;
 
 			try
 			{
@@ -101,12 +100,12 @@ namespace lispy
 			switch (first_tok.second->value_char)
 			{
 			case '+':
-				return make_variant([values]() {
+				return make_variant([values](const list&)->variant_ptr{
 					return accumulate(values.begin(), values.end(),
 						(values.front()->variant_kind == variant::kind_string ? make_variant(string("")) : make_variant(0LL)));
 				});
 			case '*':
-				return make_variant([values]() {
+				return make_variant([values](const list&) {
 					auto initial = values.at(0) * values.at(1);
 					for (size_t i = 2; i < values.size(); i++)
 						initial = initial * values[i];
@@ -115,16 +114,30 @@ namespace lispy
 			}
 			return make_variant(variant::null_kind());
 		}
+		inline static list parse_args(const token_array& tok_array, size_t& pos)
+		{
+			expect(token_type::LParen, tok_array, pos, " while seeking arguments for a lambda");
+			list args;
+			for(; tok_array.at(pos).first != token_type::RParen; pos++)
+				args.emplace_back(tok_array[pos].second);
+			expect(token_type::RParen, tok_array, pos, " while seeking to end the arguments for a lambda");
+			return args;
+		}
 		static variant_ptr parse_kw_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
 		{
 			size_t num_args = 0;
-			if (first_tok.second->value_string == "set")
+			const string& command = first_tok.second->value_string;
+			if (command == "set")
 				optional(Not, tok_array, pos);
-			bool will_lookup = !(first_tok.second->value_string == "define" ||
-								 first_tok.second->value_string == "set" ||
-								 first_tok.second->value_string == "lambda");
+			bool will_lookup = !(command == "define" ||
+								 command == "set" ||
+								 command == "lambda");
 
-			lispy::array values;
+			list arguments;
+			if(command == "lambda")
+				arguments = parse_args(tok_array, pos);
+
+			list values;
 			try
 			{
 				for (; tok_array.at(pos).first != token_type::RParen; pos++, ++num_args)
@@ -133,36 +146,36 @@ namespace lispy
 			catch (out_of_range&) { --pos;  }
 			catch (expr_over&) { }
 
-			if (first_tok.second->value_string == "if")
+			if (command == "if")
 			{
 				if (num_args != 3)
 					throw invalid_argument(string("Expected 3 arguments, but got ") + to_string(num_args));
-				return make_variant([values]() -> variant_ptr {
+				return make_variant([values](const list&) -> variant_ptr {
 					auto& cond = *values[0];
 					switch(cond.variant_kind)
 					{
 					case variant::kind::kind_function:
 					{
-						auto& value = (cond.value_function()->value_bool ? values[1] : values[2]);
-						return value->variant_kind == variant::kind_function ? value->value_function() : value;
+						auto& value = (cond.value_function({})->value_bool ? values[1] : values[2]);
+						return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
 					}
 					case variant::kind::kind_int: case variant::kind::kind_bool:
 					{
 						auto& value = (cond.value_bool ? values[1] : values[2]);
-						return value->variant_kind == variant::kind_function ? value->value_function() : value;
+						return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
 					}
 					}
 					// Only the explicit value of 0 or false can be used to evaluate false
 					return make_variant(true);
 				});
 			}
-			else if(first_tok.second->value_string == "define")
+			else if(command == "define")
 			{
 				if (num_args != 2)
 					throw invalid_argument(string("define expects 2 arguments, but got ") + to_string(num_args));
 				
 				auto env = fn->env;
-				return make_variant([env, values]() -> variant_ptr {
+				return make_variant([env, values](const list&) -> variant_ptr {
 					// values[0] should be an identifier, values[1] will be its value
 					if (values[0]->variant_kind != variant::kind_string)
 						throw invalid_argument(string("define expects an identifier as its first arg but got: ") +
@@ -178,13 +191,13 @@ namespace lispy
 					return iter.first->second;
 				});
 			}
-			else if (first_tok.second->value_string == "set")
+			else if (command == "set")
 			{
 				if (num_args != 2)
 					throw invalid_argument(string("set expects 2 arguments, but got ") + to_string(num_args));
 
-				auto env = fn->env;
-				return make_variant([env, values]() -> variant_ptr {
+				return make_variant([fn, values](const list&) -> variant_ptr {
+					auto env = fn->env;
 					if (values[0]->variant_kind != variant::kind_string)
 						throw invalid_argument("set expects an identifier as its first arg but got: " + variant::kind_str(values[0]->variant_kind));
 
@@ -193,32 +206,51 @@ namespace lispy
 					if (symbols.find(values[0]->value_string) == symbols.end())
 						throw invalid_argument("set being used on identifier that hasn't been defined: " + values[0]->value_string);
 
-					return symbols[values[0]->value_string] = values[1];
+					return symbols[values[0]->value_string] = (values[1]->variant_kind == variant::kind_function ?
+						values[1]->value_function({}) :  values[1]);
 				});
 			}
-			else if (first_tok.second->value_string == "lambda")
+			else if (command == "lambda")
 			{
-				if (num_args < 2)
-					throw invalid_argument(string("lambda expects at least 2 argument but got: ") + to_string(num_args));
+				if (num_args < 1)
+					throw invalid_argument("Lambda requires at least 1 expression");
 				
-				auto new_env = make_shared<environment>(fn->env);
-				return make_variant([new_env, values]() -> variant_ptr {
-					//return values[1]->value_function();
-					for(size_t i = 1; i < values.size()-1; i++)
-						if(values[i]->variant_kind == variant::kind_function)
-							values[i]->value_function();
-					auto& value = values.back();
-					return (value->variant_kind == variant::kind_function ? value->value_function() : value);
-				});
-			}
-			else if (first_tok.second->value_string == "begin")
-			{
-				return make_variant([values]() -> variant_ptr {
+				//auto new_env = make_shared<environment>(fn->env);
+				return make_variant([fn, arguments, values](const list& args) -> variant_ptr {
+					environment env(fn->env);
+					environment* original = fn->env;
+					const size_t argsc = args.size();
+					const size_t argumentsc = arguments.size();
+					
+					if(argsc != argumentsc)
+						printf("Warning: Number of arguments passed to lambda do "
+								"not match what it was specified with: %lu vs %lu\n", argsc, argumentsc);
+						
+					for(size_t i = 0UL; i < argsc; i++)
+						env.symbols[arguments[i]->value_string] = args[i];
+					
+					fn->env = &env;
+					
 					for(size_t i = 0; i < values.size()-1; i++)
 						if(values[i]->variant_kind == variant::kind_function)
-							values[i]->value_function();
+							values[i]->value_function({});
 					auto& value = values.back();
-					return (value->variant_kind == variant::kind_function ? value->value_function() : value);
+					
+					auto result = (value->variant_kind == variant::kind_function ? value->value_function({}) : value);
+					
+					fn->env = original;
+					
+					return result;
+				});
+			}
+			else if (command == "begin")
+			{
+				return make_variant([values](const list&) -> variant_ptr {
+					for(size_t i = 0; i < values.size()-1; i++)
+						if(values[i]->variant_kind == variant::kind_function)
+							values[i]->value_function({});
+					auto& value = values.back();
+					return (value->variant_kind == variant::kind_function ? value->value_function({}) : value);
 				});
 			}
 			return make_variant(variant::null_kind());
@@ -226,7 +258,7 @@ namespace lispy
 		static variant_ptr parse_fn_call_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
 		{
 			size_t num_args = 0;
-			lispy::array values;
+			lispy::list values;
 			try
 			{
 				for (; tok_array.at(pos).first != token_type::RParen; pos++, ++num_args)
@@ -235,18 +267,14 @@ namespace lispy
 			catch (out_of_range&) { --pos; }
 			catch (expr_over&) { }
 
-			auto env = fn->env;
+			//auto env = fn->env;
 			auto name = first_tok.second->value_string;
-			return make_variant([env, name, values]()->variant_ptr{
-				auto user_sym = env->user_fn.find(name);
-				if (user_sym != env->user_fn.end())
-					return user_sym->second(values);
+			return make_variant([fn, name, values](const list& args)->variant_ptr{
+				auto* env = fn->env;
 				
-				auto scm_sym = env->symbols.find(name);
-				if (scm_sym != env->symbols.end())
-					return scm_sym->second->value_function();
+				auto result = env->lookup(name);
 				
-				throw invalid_argument(string("Tried to call non existent function ") + name);
+				return result->variant_kind == variant::kind_function ? result->value_function(values) : result;
 			});
 		}
 		static variant_ptr parse_expr(method* fn, const token_array& tok_array, size_t& pos)

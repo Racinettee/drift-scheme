@@ -8,7 +8,7 @@ namespace lispy
 		symbols(move(env.symbols)), user_fn(move(env.user_fn))
 	{
 	}
-	void environment::add_function(const string& n, std::function<variant_ptr(const lispy::array&)> f)
+	void environment::add_function(const string& n, std::function<variant_ptr(const lispy::list&)> f)
 	{
 		user_fn[n] = f;
 	}

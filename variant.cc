@@ -29,14 +29,14 @@ namespace lispy
 		case kind_string:
 			value_string.string::~string();
 			break;
-		case kind_array:
-			value_array.~vector<variant_ptr>();
+		case kind_list:
+			value_list.~vector<variant_ptr>();
 			break;
 		case kind_table:
 			value_table.~map<string, variant_ptr>();
 			break;
 		case kind_function:
-			value_function.~function<variant_ptr()>();
+			value_function.~function<variant_ptr(const list&)>();
 			break;
 		case kind_null:
 			value_null.~null_kind();
@@ -58,7 +58,7 @@ namespace lispy
 			case variant::kind::kind_string:
 				return make_variant(l->value_int + stoll(r->value_string));
 			case variant::kind::kind_function:
-				return l + r->value_function();
+				return l + r->value_function({});
 			}
 			break;
 		case variant::kind::kind_string:
@@ -73,7 +73,7 @@ namespace lispy
 			}
 		case variant::kind::kind_function:
 				// Recurse to get the function evaluated and eventually get to a concrete value to add
-				return l->value_function() + r;
+				return l->value_function({}) + r;
 		}
 	}
 
@@ -102,7 +102,7 @@ namespace lispy
 				}
 				break;
 			case variant::kind_function:
-				return l * r->value_function();
+				return l * r->value_function({});
 			}
 			break;
 		case variant::kind::kind_string:
@@ -120,11 +120,11 @@ namespace lispy
 			case variant::kind::kind_string:
 				return make_variant(variant::null_kind());
 			case variant::kind_function:
-				return l * r->value_function();
+				return l * r->value_function({});
 			}
 			break;
 		case variant::kind_function:
-			return l->value_function() * r;
+			return l->value_function({}) * r;
 		}
 	}
 
