@@ -253,6 +253,15 @@ namespace lispy
 					return (value->variant_kind == variant::kind_function ? value->value_function({}) : value);
 				});
 			}
+			else if (command == "list")
+			{
+				return make_variant([values](const list&) -> variant_ptr {
+					list result;
+					for(auto& value : values)
+						result.push_back(value->variant_kind == variant::kind_function ? value->value_function({}) : value);
+					return make_variant(result);
+				});
+			}
 			return make_variant(variant::null_kind());
 		}
 		static variant_ptr parse_fn_call_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)

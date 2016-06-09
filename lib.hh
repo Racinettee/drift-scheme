@@ -4,7 +4,9 @@ namespace lispy
 {
 	namespace lib
 	{
-		variant_ptr print(const lispy::list&);
-		variant_ptr println(const lispy::list&);
+		variant_ptr print(const list&);
+		variant_ptr println(const list&);
+		variant_ptr readln(const list&);
+		variant_ptr foreach(const list&);
 	}
 }

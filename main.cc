@@ -25,6 +25,7 @@ int main() try
 	lex.add_keyword("set");
 	lex.add_keyword("lambda");
 	lex.add_keyword("begin");
+	lex.add_keyword("list");
 	token_array test_tokens = lex.lex_file("test.scm");
 	environment env = std_env();
 	env.symbols["x"] = make_variant(100LL);

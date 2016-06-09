@@ -17,6 +17,8 @@ namespace lispy
 		environment env;
 		env.add_function("print", lib::print);
 		env.add_function("println", lib::println);
+		env.add_function("readln", lib::readln);
+		env.add_function("foreach", lib::foreach);
 		env.symbols["pi"] = make_variant(3.141592653589793);
 		return env;
 	}

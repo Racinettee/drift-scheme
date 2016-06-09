@@ -19,3 +19,7 @@
 	(begin
 		(println "This is the else statement")
 		(println "It has multiple statements")))
+
+(println (list "Billy bo jangles" 1.0 8675309 "Starwars luke" (* 3 "Wonderful Franky")))
+
+(foreach (list 1 2 3 4 5 6 7 8 9 10) (lambda (val) (println "Line: " val)))
