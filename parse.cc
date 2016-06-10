@@ -50,8 +50,10 @@ namespace lispy
 			case Identifier:
 			{
 				string identifier = tok.second->value_string;
-				return (lookup_identifiers ? make_variant([fn, identifier](const list&) {
-					return fn->env->lookup(identifier);
+				// Maybe arguments can be passed down to this function to solve the issue of de-referencing predicates
+				return (lookup_identifiers ? make_variant([fn, identifier](const list& args) {
+					auto found = fn->env->lookup(identifier);
+					return found->variant_kind == variant::kind_function ? found->value_function(args) : found; //return fn->env->lookup(identifier);
 				}) : tok.second);
 			}
 			case LParen:
