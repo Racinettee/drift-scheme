@@ -1,7 +1,7 @@
 #include "variant.hh"
 
 using namespace std;
-namespace lispy
+namespace drift
 {
 	namespace
 	{

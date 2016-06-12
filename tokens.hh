@@ -7,7 +7,7 @@
 #ifdef DEBUG
 #include <iostream>
 #endif
-namespace lispy
+namespace drift
 {
 	enum token_type
 	{

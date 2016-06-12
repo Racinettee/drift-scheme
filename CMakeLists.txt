@@ -13,7 +13,9 @@ set(core_files
     lex.cc
     lib.cc
     parse.cc
-    variant.cc)
+    variant.cc
+    context.hh
+    context.cc)
     
 add_executable(drift_scheme_test
     ${core_files}
@@ -22,3 +24,4 @@ add_executable(drift_scheme_test
 set_property(TARGET drift_scheme_test PROPERTY CXX_STANDARD 14)
 
 configure_file(test.scm test.scm COPYONLY)
+configure_file(README.md README.md COPYONLY)

@@ -3,7 +3,7 @@
 
 #include "tokens.hh"
 
-namespace lispy
+namespace drift
 {
 	class lexer
 	{

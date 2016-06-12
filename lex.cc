@@ -6,7 +6,7 @@
 #include <cstdlib>
 using namespace std;
 
-namespace lispy
+namespace drift
 {
 	namespace
 	{
@@ -231,10 +231,6 @@ lexer::lexer()
 {
 	// Load the keywords
 	token_key["if"] = token_type::Keyword;
-	token_key["while"] = token_type::Keyword;
-	token_key["for"] = token_type::Keyword;
-	token_key["break"] = token_type::Keyword;
-	token_key["else"] = token_type::Keyword;
 	// Load the syntax requirements
 	token_key[";"] = token_type::Semicolon;
 	token_key[":"] = token_type::Colon;
