@@ -10,7 +10,7 @@ namespace drift
         {
         public:
 			selector() = default;
-			selector(variant_ptr v): obj(v) { }
+			selector(variant_ptr& v): obj(v) { }
 			selector(const selector& o): obj(o.obj) { }
 			selector(selector&& o): obj(o.obj) { }
 			
@@ -26,7 +26,7 @@ namespace drift
 			}
             template<class T> T as() const;
         private:
-            variant_ptr obj;
+            variant_ptr& obj;
         };
         class context
         {

@@ -49,7 +49,8 @@ namespace drift
 		variant(bool v) : value_bool(v), variant_kind(kind_bool) { }
 		variant(long long v) : value_int(v), variant_kind(kind_int) { }
 		variant(double v) : value_double(v), variant_kind(kind_double) { }
-		variant(const std::string& v) : value_string(v), variant_kind(kind_string) { }
+		variant(const string& v) : value_string(v), variant_kind(kind_string) { }
+		variant(const char* v) : variant(string(v)) { }
 		variant(const decltype(value_list)& v) : value_list(v), variant_kind(kind_list) { }
 		variant(const decltype(value_table)& v) : value_table(v), variant_kind(kind_table) { }
 		variant(function v) : value_function(v), variant_kind(kind_function) { }

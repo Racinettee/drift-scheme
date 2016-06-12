@@ -9,12 +9,14 @@ using namespace std;
 int main() try
 {
 	using namespace drift;
+	// Create a context
 	scheme::context context;
-	context["x"] = 10000LL;
+	// Set some data to be used in the script
+	context["x"] = 100LL;
+	// Load and run the script
 	context.load_file("test.scm");
-	puts("Gonna try and call a scheme function in c++");
-	//context["lam"]("Kilimanjaro Billy Boy", "Andrew the dress shirt kid");
-	//context["x"] = 
+	// Call a function defined in test.scm
+	context["lam"]("Jericho Billy", "Andrew");
 }
 catch (exception& e)
 {
