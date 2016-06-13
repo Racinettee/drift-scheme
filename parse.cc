@@ -47,7 +47,11 @@ namespace drift
 
 				switch (tok.first)
 				{
-				case Int: case Str:	case Num:
+				case Int: case Num:
+					return tok.second;
+				case Str:
+					if (tok_array.at(pos + 1).first == Quote)
+						++pos;
 					return tok.second;
 				case Identifier:
 				{
@@ -292,7 +296,15 @@ namespace drift
 			}
 			static variant_ptr parse_expr(method* fn, const token_array& tok_array, size_t& pos)
 			{
-				expect(token_type::LParen, tok_array, pos, " when staring to parse expression");
+				//expect(token_type::LParen, tok_array, pos, " when staring to parse expression");
+				if (tok_array.at(pos).first != token_type::LParen)
+				{
+					size_t placehold = 0;
+					auto result = parse_element(fn, tok_array, pos, placehold, false); ++pos;
+					return result;
+				}
+				else
+					expect(token_type::LParen, tok_array, pos, " when staring to parse expression");
 
 				variant_ptr result;
 

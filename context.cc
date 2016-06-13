@@ -24,5 +24,18 @@ namespace drift
 			for (auto& expr : expressions)
 				expr->value_function({});
 		}
+		selector context::operator()(const string& line)
+		{
+			token_array tokens = lex.lex_string(line);
+
+			methods.emplace_back(parse(env, tokens));
+
+			auto& expressions = methods.back()->expressions;
+
+			auto& expr = expressions.at(0);
+
+			last_result = expr->variant_kind == variant::kind_function ? expr->value_function({}) : expr;
+			return last_result;
+		}
 	}
 }

@@ -33,12 +33,13 @@ namespace drift
         public:
 			context();
 			void load_file(const string&);
+			selector operator()(const string& line);
 			selector operator[](const string& name)
 			{
 				return env.symbols[name];
 			}
-
         private:
+			variant_ptr last_result;
 			std::vector<std::unique_ptr<method>> methods;
             environment env;
             lexer lex;
