@@ -14,3 +14,6 @@
 *.idb
 *.enc
 build/
+.kev4/
+.vs/
+.vscode/

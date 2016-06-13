@@ -27,7 +27,7 @@ namespace drift
 		switch(variant_kind)
 		{
 		case kind_string:
-			value_string.string::~string();
+			value_string.~string();
 			break;
 		case kind_list:
 			value_list.~vector<variant_ptr>();
@@ -75,6 +75,7 @@ namespace drift
 				// Recurse to get the function evaluated and eventually get to a concrete value to add
 				return l->value_function({}) + r;
 		}
+		return null();
 	}
 
 	variant_ptr operator*(variant_ptr l, variant_ptr r)
@@ -126,15 +127,16 @@ namespace drift
 		case variant::kind_function:
 			return l->value_function({}) * r;
 		}
+		return null();
 	}
 
 	variant_ptr operator-(variant_ptr l, variant_ptr r)
 	{
-		return make_shared<variant>(variant::null_kind());
+		return null();
 	}
 
 	variant_ptr operator/(variant_ptr l, variant_ptr r)
 	{
-		return make_shared<variant>(variant::null_kind());
+		return null();
 	}
 }

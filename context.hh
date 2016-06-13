@@ -17,7 +17,7 @@ namespace drift
             template<class ...Args> selector operator()(Args... args)
             {
                 auto& fn = obj->value_function;
-				return fn(list({make_variant(args)...}));
+				return fn({make_variant(args)...});
             }
             template<class T> selector operator=(const T& v)
 			{

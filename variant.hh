@@ -66,7 +66,10 @@ namespace drift
 	{
 		return std::make_shared<variant>(std::forward<Args>(args)...);
 	}
-
+	inline variant_ptr null()
+	{
+		return make_variant(variant::null_kind());
+	}
 	variant_ptr operator+(variant_ptr, variant_ptr);
 	variant_ptr operator*(variant_ptr, variant_ptr);
 	variant_ptr operator-(variant_ptr, variant_ptr);
