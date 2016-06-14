@@ -46,18 +46,26 @@ namespace drift
         };
 		template<> inline long long selector::as<long long>() const
 		{
+			if (obj->variant_kind != variant::kind_int)
+				throw variant::incorrect_treatment(obj->variant_kind, variant::kind_int);
 			return obj->value_int;
 		}
 		template<> inline double selector::as<double>() const
 		{
+			if (obj->variant_kind != variant::kind_double)
+				throw variant::incorrect_treatment(obj->variant_kind, variant::kind_double);
 			return obj->value_double;
 		}
 		template<> inline string selector::as<string>() const
 		{
+			if (obj->variant_kind != variant::kind_string)
+				throw variant::incorrect_treatment(obj->variant_kind, variant::kind_string);
 			return obj->value_string;
 		}
 		template<> inline list selector::as<list>() const
 		{
+			if (obj->variant_kind != variant::kind_list)
+				throw variant::incorrect_treatment(obj->variant_kind, variant::kind_list);
 			return obj->value_list;
 		}
     }

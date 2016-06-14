@@ -43,6 +43,8 @@ namespace drift
 			break;
 		}
 	}
+	variant::incorrect_treatment::incorrect_treatment(kind actual, kind alt) :
+		runtime_error("variant of "s + kind_str(actual) + " treated as: "s + kind_str(alt)) { }
 
 	variant_ptr operator+(variant_ptr l, variant_ptr r)
 	{

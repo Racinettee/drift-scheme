@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <memory>
@@ -59,6 +60,11 @@ namespace drift
 		~variant();
 
 		static string kind_str(kind);
+
+		struct incorrect_treatment : std::runtime_error
+		{
+			incorrect_treatment(kind actual, kind alt);
+		};
 	};
 	template <typename... Args>
 	auto make_variant(Args&&... args) ->

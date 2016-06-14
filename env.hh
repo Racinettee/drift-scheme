@@ -1,6 +1,6 @@
 #pragma once
 #include "variant.hh"
-#include <map>
+#include <unordered_map>
 #include <list>
 #include <deque>
 #include <vector>
@@ -15,8 +15,8 @@ namespace drift
 			
 			environment(environment* parent) : parent(parent) { }
 			environment(environment&&);
-			std::map<string, variant_ptr> symbols;
-			std::map<string, variant_ptr> user_fn;
+			std::unordered_map<string, variant_ptr> symbols;
+			std::unordered_map<string, variant_ptr> user_fn;
 			environment* parent = nullptr;
 			variant_ptr& lookup(const string& name) {
 				try {
