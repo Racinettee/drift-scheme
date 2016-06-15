@@ -48,11 +48,11 @@ int main() try
 
 	assertions assert;
 	assert.eq(100LL, context("100"s));
-	assert.eq("Hello world"s, context("\"Hello world\""s));
+	assert.eq("Hello world"s, context(R"("Hello world")"s));
 	assert.eq(3.1415, context("3.1415"s));
 	assert.eq(10LL, context("(+ 1 2 3 4)"s));
 	assert.eq(100LL, context("(* 5 5 4)"s));
-	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"));
+	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"s));
 	assert.not_type<drift::string>(context("100000"s));
 }
 catch (exception& e)

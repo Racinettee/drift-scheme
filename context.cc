@@ -1,18 +1,19 @@
+#include <string>
 #include "context.hh"
-
+using namespace std;
 namespace drift
 {
 	namespace scheme
 	{
 		context::context(): env(std_env())
 		{
-			lex.add_keyword("define");
-			lex.add_keyword("set");
-			lex.add_keyword("lambda");
-			lex.add_keyword("begin");
-			lex.add_keyword("list");
+			lex.add_keyword("define"s);
+			lex.add_keyword("set"s);
+			lex.add_keyword("lambda"s);
+			lex.add_keyword("begin"s);
+			lex.add_keyword("list"s);
 		}
-		std::unique_ptr<method> parse(environment& e, const token_array& tokens);
+		unique_ptr<method> parse(environment& e, const token_array& tokens);
 		void context::load_file(const string& name)
 		{
 			token_array tokens = lex.lex_file(name);

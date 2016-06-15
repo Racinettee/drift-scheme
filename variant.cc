@@ -5,7 +5,7 @@ namespace drift
 {
 	namespace
 	{
-		const char* kind_str_values[] =
+		static const char* kind_str_values[] =
 		{
 			"char",
 			"bool",
@@ -15,6 +15,7 @@ namespace drift
 			"array",
 			"table",
 			"function",
+			"reference",
 			"null"
 		};
 	}

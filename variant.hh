@@ -60,6 +60,10 @@ namespace drift
 		~variant();
 
 		static string kind_str(kind);
+		inline variant_ptr resolve() const
+		{
+			//return variant_kind == kind::kind_function ? value_function({}) : 
+		}
 
 		struct incorrect_treatment : std::runtime_error
 		{
