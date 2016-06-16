@@ -11,6 +11,7 @@ namespace drift
         public:
 			selector() = default;
 			selector(variant_ptr& v): obj(v) { }
+			selector(variant_ptr&& v): obj(v) { }
 			selector(const selector& o): obj(o.obj) { }
 			selector(selector&& o): obj(o.obj) { }
 			
@@ -40,7 +41,8 @@ namespace drift
 			}
         private:
 			variant_ptr last_result;
-			std::vector<std::unique_ptr<method>> methods;
+			std::unique_ptr<method> main_method;
+			//std::vector<std::unique_ptr<method>> methods;
             environment env;
             lexer lex;
         };

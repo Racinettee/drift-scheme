@@ -341,12 +341,17 @@ namespace drift
 				return result;
 			}
 		}
-		unique_ptr<method> parse(environment& e, const token_array& tokens)
+		// The environmeent on the method* passed in already has the environment set
+		void parse(method* fn, const token_array& tokens)
 		{
 			size_t pos = 0;
-			unique_ptr<method> fn = make_unique<method>(); fn->env = &e;
 			while (pos < tokens.size())
-				fn->expressions.push_back(parse_expr(fn.get(), tokens, pos));
+				fn->expressions.push_back(parse_expr(fn, tokens, pos));
+		}
+		unique_ptr<method> parse(environment& e, const token_array& tokens)
+		{
+			unique_ptr<method> fn = make_unique<method>(); fn->env = &e;
+			parse(fn.get(), tokens);
 			return move(fn);
 		}
 	}
