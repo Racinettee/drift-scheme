@@ -10,23 +10,27 @@ namespace drift
         {
         public:
 			selector() = default;
-			selector(variant_ptr& v): obj(v) { }
-			selector(const selector& o): obj(o.obj) { }
-			selector(selector&& o): obj(o.obj) { }
+			selector(const selector& o): obj(o.obj), ptr(o.ptr) { }
+			selector(selector&& o): obj(o.obj), ptr(o.ptr) { }
 			
             template<class ...Args> selector operator()(Args... args)
             {
-                auto& fn = obj->value_function;
+                auto& fn = (*ptr)->value_function;
 				return fn({make_variant(args)...});
             }
             template<class T> selector operator=(const T& v)
 			{
-				obj = make_variant(v);
+				*ptr = make_variant(v);
 				return *this;
 			}
             template<class T> T as() const;
         private:
-            variant_ptr& obj;
+			friend class context;
+			selector(variant_ptr& c) : ptr(&c) { }
+			selector(variant_ptr&& m) : obj(m), ptr(&obj) { }
+			// We interact exclusively through ptr
+            variant_ptr* ptr;
+			variant_ptr obj;
         };
         class context
         {
@@ -39,8 +43,6 @@ namespace drift
 				return env.symbols[name];
 			}
         private:
-			variant_ptr last_result;
-			std::vector<std::unique_ptr<method>> methods;
             environment env;
             lexer lex;
         };

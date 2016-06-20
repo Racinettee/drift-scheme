@@ -39,8 +39,8 @@ namespace drift
 			}
 	#define expect(tok, exparry, ptr, msg) expect_fn(tok, exparry, ptr, string(msg)+" "+string(__FILE__)+":"+std::to_string(__LINE__))
 
-			static variant_ptr parse_expr(method* fn, const token_array& tok_array, size_t& pos);
-			static variant_ptr parse_element(method* fn, const token_array& tok_array, size_t& pos, size_t& num_args, bool lookup_identifiers = true)
+			static variant_ptr parse_expr(shared_ptr<method>, const token_array&, size_t& pos);
+			static variant_ptr parse_element(shared_ptr<method> fn, const token_array& tok_array, size_t& pos, size_t& num_args, bool lookup_identifiers = true)
 			{
 				while (tok_array.at(pos).first == Quote) pos++;
 				auto& tok = tok_array.at(pos);
@@ -73,7 +73,7 @@ namespace drift
 					return parse_element(fn, tok_array, ++pos, num_args);
 				}
 			}
-			static void parse_condition(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
+			static void parse_condition(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
 				size_t num_args = 0;
 
@@ -91,7 +91,7 @@ namespace drift
 					break;
 				}
 			}
-			static variant_ptr parse_arith_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
+			static variant_ptr parse_arith_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
 				size_t num_args = 0;
 
@@ -131,7 +131,7 @@ namespace drift
 				expect(token_type::RParen, tok_array, pos, " while seeking to end the arguments for a lambda");
 				return args;
 			}
-			static variant_ptr parse_kw_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
+			static variant_ptr parse_kw_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
 				size_t num_args = 0;
 				const string& command = first_tok.second->value_string;
@@ -272,7 +272,7 @@ namespace drift
 				}
 				return make_variant(variant::null_kind());
 			}
-			static variant_ptr parse_fn_call_expr(const token& first_tok, method* fn, const token_array& tok_array, size_t& pos)
+			static variant_ptr parse_fn_call_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
 				size_t num_args = 0;
 				list values;
@@ -294,9 +294,8 @@ namespace drift
 					return result->variant_kind == variant::kind_function ? result->value_function(values) : result;
 				});
 			}
-			static variant_ptr parse_expr(method* fn, const token_array& tok_array, size_t& pos)
+			static variant_ptr parse_expr(shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
-				//expect(token_type::LParen, tok_array, pos, " when staring to parse expression");
 				if (tok_array.at(pos).first != token_type::LParen)
 				{
 					size_t placehold = 0;
@@ -341,12 +340,12 @@ namespace drift
 				return result;
 			}
 		}
-		unique_ptr<method> parse(environment& e, const token_array& tokens)
+		shared_ptr<method> parse(environment& e, const token_array& tokens)
 		{
 			size_t pos = 0;
-			unique_ptr<method> fn = make_unique<method>(); fn->env = &e;
+			shared_ptr<method> fn = make_shared<method>(); fn->env = &e;
 			while (pos < tokens.size())
-				fn->expressions.push_back(parse_expr(fn.get(), tokens, pos));
+				fn->expressions.push_back(parse_expr(fn, tokens, pos));
 			return move(fn);
 		}
 	}
