@@ -326,6 +326,7 @@ namespace drift
 						break;
 					case RParen:
 						// We got an empty set of paren's
+						printf("Warn: empty expression '()' - will be omitted\n");
 						pos--;
 						break;
 					}
@@ -345,7 +346,11 @@ namespace drift
 			size_t pos = 0;
 			shared_ptr<method> fn = make_shared<method>(); fn->env = &e;
 			while (pos < tokens.size())
-				fn->expressions.push_back(parse_expr(fn, tokens, pos));
+			{
+				auto expr = parse_expr(fn, tokens, pos);
+				if(expr)
+					fn->expressions.push_back(expr);
+			}
 			return move(fn);
 		}
 	}

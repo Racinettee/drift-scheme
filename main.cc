@@ -12,7 +12,7 @@ public:
 	assertions() = default;
 	~assertions()
 	{
-		printf("Assertions: %i failed; %i run;\n", failed_assertions, run_assertions);
+		printf("Assertions: %lu failed; %lu run;\n", failed_assertions, run_assertions);
 	}
 	template<class T> void eq(const T& val, const drift::scheme::selector& res)
 	{
@@ -27,6 +27,28 @@ public:
 			++failed_assertions;
 		}
 		catch (drift::variant::incorrect_treatment&){ }
+		++run_assertions;
+	}
+	template<class T> void is_type(const drift::scheme::selector& res)
+	{
+		try {
+			res.as<T>();
+		}
+		catch(...) {
+			++failed_assertions;
+		}
+		++run_assertions;
+	}
+	void no_throw(std::function<void()> fn)
+	{
+		try
+		{
+			fn();
+		}
+		catch(...)
+		{
+			++failed_assertions;
+		}
 		++run_assertions;
 	}
 private:
@@ -47,13 +69,21 @@ int main() try
 	context["lam"s]("Jericho Billy"s, "Andrew"s);
 
 	assertions assert;
+	puts("Test empty expressions: '()' expect a warning.");
+	assert.no_throw([&context]() { context("()"); });
+	puts("Test atomic values (expressions that are just literals)");
 	assert.eq(100LL, context("100"s));
 	assert.eq("Hello world"s, context(R"("Hello world")"s));
 	assert.eq(3.1415, context("3.1415"s));
-	assert.eq(10LL, context("(+ 1 2 3 4)"s));
-	assert.eq(100LL, context("(* 5 5 4)"s));
-	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"s));
+	puts("Test addition and multiplication");
+	assert.eq(10LL, context("(+ 1 2 3 4)"s)());
+	assert.eq(100LL, context("(* 5 5 4)"s)());
+	puts("Test that a function returning an atomic returns the correct value");
+	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"s)());
+	puts("Type tests");
 	assert.not_type<drift::string>(context("100000"s));
+	assert.is_type<drift::function>(context(R"((lambda () "Scheme"))"s));
+	assert.is_type<drift::string>(context(R"((lambda () "Scheme"))"s)());
 }
 catch (exception& e)
 {

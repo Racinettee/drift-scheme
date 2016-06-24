@@ -31,9 +31,16 @@ namespace drift
 
 			auto method = parse(env, tokens);
 
-			auto& expr = method->expressions.at(0);
+			try {
+				return move(method->expressions.at(0));
+				//auto& expr = method->expressions.at(0);
 
-			return expr->variant_kind == variant::kind_function ? expr->value_function({}) : expr;
+				//return expr->variant_kind == variant::kind_function ? expr->value_function({}) : expr;
+			}
+			catch(...)
+			{
+				return selector();
+			}
 		}
 	}
 }

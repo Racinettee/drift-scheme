@@ -64,6 +64,12 @@ namespace drift
 				throw variant::incorrect_treatment(obj->variant_kind, variant::kind_string);
 			return obj->value_string;
 		}
+		template<> inline drift::function selector::as<function>() const
+		{
+			if (obj->variant_kind != variant::kind_function)
+				throw variant::incorrect_treatment(obj->variant_kind, variant::kind_function);
+			return obj->value_function;
+		}
 		template<> inline list selector::as<list>() const
 		{
 			if (obj->variant_kind != variant::kind_list)
