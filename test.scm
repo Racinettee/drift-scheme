@@ -23,3 +23,7 @@
 (println "To print a list" (list "Billy bo jangles" 1.0 8675309 "Starwars luke" (* 3 "Wonderful Franky")))
 
 (foreach (list 1 2 3 4 5 6 7 8 9 10) (lambda (val) (println "Line: " val)))
+
+(foreach (list "Un" "Duex" "Trois" "Quatre" "Cinq" "Six" "Sept") println)
+
+(println (if (!= 3 4) "InEquality" "Equality")) 

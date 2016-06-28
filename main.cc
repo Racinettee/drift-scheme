@@ -66,7 +66,7 @@ int main() try
 	// Load and run the script
 	context.load_file("test.scm");
 	// Call a function defined in test.scm
-	context["lam"s]("Jericho Billy"s, "Andrew"s);
+	/*context["lam"s]("Jericho Billy"s, "Andrew"s);
 
 	assertions assert;
 	puts("Test empty expressions: '()' expect a warning.");
@@ -82,8 +82,10 @@ int main() try
 	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"s)());
 	puts("Type tests");
 	assert.not_type<drift::string>(context("100000"s));
+	puts("Return a lambda and see it as function");
 	assert.is_type<drift::function>(context(R"((lambda () "Scheme"))"s));
-	assert.is_type<drift::string>(context(R"((lambda () "Scheme"))"s)());
+	puts("Lambda returned + called in C++ returns string");
+	assert.is_type<drift::string>(context(R"((lambda () "Scheme"))"s)());*/
 }
 catch (exception& e)
 {

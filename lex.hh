@@ -19,6 +19,7 @@ namespace drift
 		int lex_syntax(std::istream&, token_array&);
 		void lex_string(std::istream&, token_array&, char);
 		bool is_whitespace(char);
+		bool syntax_look(std::istream&, std::string&, int&);
 	private:
 		// Text editors start with line one
 		long long line_number = 1LL;

@@ -37,6 +37,10 @@ namespace drift
 				if (tok_ty == tok_array.at(ptr).first)
 					++ptr;
 			}
+			inline static token_type peek_tok(const token_array& t, size_t pos)
+			{
+				return t.at(pos + 1).first;
+			}
 	#define expect(tok, exparry, ptr, msg) expect_fn(tok, exparry, ptr, string(msg)+" "+string(__FILE__)+":"+std::to_string(__LINE__))
 
 			static variant_ptr parse_expr(shared_ptr<method>, const token_array&, size_t& pos);
@@ -50,7 +54,7 @@ namespace drift
 				case Int: case Num:
 					return tok.second;
 				case Str:
-					if (tok_array.at(pos + 1).first == Quote)
+					if (peek_tok(tok_array, pos) == Quote) //tok_array.at(pos + 1).first == Quote)
 						++pos;
 					return tok.second;
 				case Identifier:
@@ -73,23 +77,45 @@ namespace drift
 					return parse_element(fn, tok_array, ++pos, num_args);
 				}
 			}
-			static void parse_condition(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
+			static variant_ptr parse_condition(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
 				size_t num_args = 0;
 
+				list values;
+
 				for (; tok_array.at(pos).first != token_type::RParen; pos++, ++num_args)
-					parse_element(fn, tok_array, pos, num_args);
+					values.emplace_back(parse_element(fn, tok_array, pos, num_args));
+				
+				if (num_args <= 1)
+					throw invalid_argument("Error: equality or inequality expression requires one or more arguments");
 
-				if (num_args > 2)
-					printf("Warning, comparison should only have 2 arguments");
+				auto& oper = first_tok.second->value_string;
 
-				switch (first_tok.first)
-				{
-				case LThan:
-				case GThan:
-					//fn->instructions.push_back(cmp_ineq);
-					break;
-				}
+				if (num_args > 2 && (oper != "=" || oper != "!"))
+					printf("Warn: comparisons that are not == or != should only have 2 arguments");
+
+				if(oper == "==")
+					return num_args > 2 ? 
+						make_variant([values](const list&)->variant_ptr {
+							for(size_t i = 0; i < values.size()-1; i++)
+								if(values[i] != values[i + 1])
+									return make_variant(false);
+							return make_variant(true);
+						}) :
+						make_variant([values](const list&)->variant_ptr {
+							return values[0] == values[1];
+						});
+				else if(oper == "!=")
+					return num_args > 2 ?
+						make_variant([values](const list&)->variant_ptr {
+							for(size_t i = 0; i < values.size()-1; i++)
+								if(values[i] == values[i + 1])
+									return make_variant(false);
+							return make_variant(true);
+						}) :
+						make_variant([values](const list&)->variant_ptr {
+							return values[0] != values[1];
+						});
 			}
 			static variant_ptr parse_arith_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
@@ -316,13 +342,17 @@ namespace drift
 						result = parse_arith_expr(first_tok, fn, tok_array, pos);
 						break;
 
+					case Conditional:
+					case LThan:	case GThan:
+						result = parse_condition(first_tok, fn, tok_array, pos);
+						break;
+
 					case Keyword:
 						result = parse_kw_expr(first_tok, fn, tok_array, pos);
 						break;
 
 					case Identifier:
 						result = parse_fn_call_expr(first_tok, fn, tok_array, pos);
-					case LThan:
 						break;
 					case RParen:
 						// We got an empty set of paren's

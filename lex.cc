@@ -161,20 +161,34 @@ void lexer::lex_identifier(istream& input, token_array& tok_array)
 	
 	tok_array.emplace_back(token_key.find(keywd_ident) != token_key.end() ? token_key[keywd_ident] : token_type::Identifier, make_variant(keywd_ident));
 }
-
-int lexer::lex_syntax(istream& input, token_array& tok_array)
+bool lexer::syntax_look(istream& input, string& syntax, int& characters_read)
 {
-	string syntax = "";
-
-	// Nov 15, 2015 revision, this function for simplicity will only produce one token, for 1 syntax character
-	// it will be easy for the parser to check for multi character syntax with the tokens eg += tok-plus tok-assign
-	int characters_read = 0;
 	if (!input.eof() && !is_whitespace(input.peek()) && !isalnum(input.peek()))
 	{
 		syntax += input.get();
-		characters_read++;
+		++characters_read;
+		if(!input.eof() &&
+		   !is_whitespace(input.peek()) &&
+		   !isalnum(input.peek()) &&
+		   token_key.find(syntax+(char)input.peek()) != token_key.end())
+			syntax_look(input, syntax, characters_read);
+		return true;
 	}
-	else return 0;
+	return false;
+}
+int lexer::lex_syntax(istream& input, token_array& tok_array)
+{
+	string syntax = "";
+	int characters_read = 0;
+
+	//if (!input.eof() && !is_whitespace(input.peek()) && !isalnum(input.peek()))
+	//{
+	//	syntax += input.get();
+	//	characters_read++;
+	//}
+	//else return 0;
+	if(!syntax_look(input, syntax, characters_read))
+		return 0;
 
 	// If the whole syntax found is good then move on
 	if (token_key.find(syntax) != token_key.end())
@@ -196,7 +210,7 @@ int lexer::lex_syntax(istream& input, token_array& tok_array)
 		}
 		else
 		{
-			tok_array.emplace_back(token_key[syntax], make_variant((unsigned char)syntax[0]));
+			tok_array.emplace_back(token_key[syntax], make_variant(syntax));
 		}
 		return 0;
 	}
@@ -261,6 +275,7 @@ lexer::lexer()
 	token_key["-"] = token_type::Arith;
 	token_key["*"] = token_type::Arith;
 	token_key["/"] = token_type::Arith;
+	token_key["="] = token_type::Arith;
 	//
 	token_key["!"] = token_type::Not;
 }
