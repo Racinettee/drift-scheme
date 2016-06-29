@@ -296,6 +296,21 @@ namespace drift
 						return make_variant(result);
 					});
 				}
+				else if (command == "map")
+				{
+					if(values.size() != 2)
+						throw invalid_argument("Invalid number of arguments: map function takes 2: predicate & list");
+					return make_variant([values](const list&) -> variant_ptr {
+						list result;
+						auto& fn = values[0]->value_function;
+						auto ls = values[1]->value_function({})->value_list;
+
+						for(auto& value : ls)
+							result.emplace_back(fn({value}));
+						
+						return make_variant(result);
+					});
+				}
 				return make_variant(variant::null_kind());
 			}
 			static variant_ptr parse_fn_call_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)

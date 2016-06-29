@@ -111,6 +111,14 @@ int main() try
 	assert.equ(false, context("(== 3 3 4 3)")());
 	assert.equ(true, context("(!= 1 2 3 4 5)")());
 	assert.equ(false, context("(!= 5 5 5 5 5 5)")());
+	puts("Assign a variable to a list");
+	assert.no_throw([&context](){
+		context("(set! ll (list 10 20 30 40))");
+	});
+	puts("Test the map function");
+	assert.no_throw([&context](){
+		context("(println (map (lambda (x) (* x x)) (list 1 2 3 4)))")();
+	});
 }
 catch (exception& e)
 {

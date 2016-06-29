@@ -12,6 +12,7 @@ namespace drift
 			lex.add_keyword("lambda"s);
 			lex.add_keyword("begin"s);
 			lex.add_keyword("list"s);
+			lex.add_keyword("map"s);
 		}
 		shared_ptr<method> parse(environment& e, const token_array& tokens);
 		void context::load_file(const string& name)
