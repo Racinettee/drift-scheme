@@ -26,4 +26,4 @@
 
 (foreach (list "Un" "Duex" "Trois" "Quatre" "Cinq" "Six" "Sept") println)
 
-(println (if (!= 3 4) "InEquality" "Equality")) 
+(println "Conditional expression was " (if (!= 3 3) "unequal" "equal")) 

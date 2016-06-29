@@ -131,7 +131,7 @@ namespace drift
 				catch (out_of_range&) {	}
 				catch (expr_over&) { }
 
-				switch (first_tok.second->value_char)
+				switch (first_tok.second->value_string[0])
 				{
 				case '+':
 					return make_variant([values](const list&)->variant_ptr{
