@@ -12,7 +12,8 @@ public:
 	assertions() = default;
 	~assertions()
 	{
-		printf("Assertions: %lu failed; %lu run;\n", failed_assertions, run_assertions);
+		printf("Assertions %s: %lu failed; %lu run;\n", failed_assertions == 0 ?
+			"succeeded" : "failed", failed_assertions, run_assertions);
 	}
 	template<class T> void eq(const T& val, const drift::scheme::selector& res)
 	{

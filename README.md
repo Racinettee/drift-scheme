@@ -1,5 +1,5 @@
-#drift::scheme
-drift::scheme is a work in progress impelmentation of scheme designed to 
+#drift::schemy
+drift::schemy is a work in progress impelmentation of scheme designed to 
 interact nicely with c++.
 ### Current working example as seen in main.cc:
 ```C++
@@ -17,3 +17,4 @@ interact nicely with c++.
 To come:
 - Tests, tests and tests
 - More robust parsing
+- Inequality
