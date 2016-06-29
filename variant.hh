@@ -80,8 +80,8 @@ namespace drift
 	{
 		return make_variant(variant::null_kind());
 	}
-	variant_ptr operator==(variant_ptr, variant_ptr);
-	variant_ptr operator!=(variant_ptr, variant_ptr);
+	bool operator==(variant_ptr, variant_ptr);
+	bool operator!=(variant_ptr, variant_ptr);
 	variant_ptr operator+(variant_ptr, variant_ptr);
 	variant_ptr operator*(variant_ptr, variant_ptr);
 	variant_ptr operator-(variant_ptr, variant_ptr);

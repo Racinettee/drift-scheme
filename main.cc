@@ -15,10 +15,20 @@ public:
 		printf("Assertions %s: %lu failed; %lu run;\n", failed_assertions == 0 ?
 			"succeeded" : "failed", failed_assertions, run_assertions);
 	}
-	template<class T> void eq(const T& val, const drift::scheme::selector& res)
+	template<class T> void eq(const T& val, const drift::scheme::selector& res, const string& msg = "")
 	{
-		if (val != res.as<T>())
+		if (val != res.as<T>()) {
 			++failed_assertions;
+			cout << msg << " : " << val << " not equivalent to " << res.as<T>() << endl;
+		}
+		++run_assertions;
+	}
+	template<class T> void neq(const T& val, const drift::scheme::selector& res, const string& msg = "")
+	{
+		if (val == res.as<T>()) {
+			++failed_assertions;
+			cout << msg << " : " << val << " is equivalent to " << res.as<T>() << endl;
+		}
 		++run_assertions;
 	}
 	template<class T> void not_type(const drift::scheme::selector& res)
@@ -56,6 +66,8 @@ private:
 	std::size_t failed_assertions = 0;
 	std::size_t run_assertions = 0;
 };
+#define equ(l, r) eq(l, r, #l " == " #r)
+#define nequ(l, r) neq(l, r, #l " != " #r)
 
 int main() try
 {
@@ -94,6 +106,11 @@ int main() try
 	assert.no_throw([&context](){
 		context("(lambda (msg) (println \"Message from C++: \" msg))")("Hello world... again");
 	});
+	puts("Multiple equality");
+	assert.equ(true, context("(== 3 3 3 3)")());
+	assert.equ(false, context("(== 3 3 4 3)")());
+	assert.equ(true, context("(!= 1 2 3 4 5)")());
+	assert.equ(false, context("(!= 5 5 5 5 5 5)")());
 }
 catch (exception& e)
 {

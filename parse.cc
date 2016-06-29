@@ -91,8 +91,8 @@ namespace drift
 
 				auto& oper = first_tok.second->value_string;
 
-				if (num_args > 2 && (oper != "=" || oper != "!"))
-					printf("Warn: comparisons that are not == or != should only have 2 arguments");
+				if (num_args > 2 && !(oper == "==" || oper == "!="))
+					printf("Warn: comparisons that are not == or != should only have 2 arguments\n");
 
 				if(oper == "==")
 					return num_args > 2 ? 
@@ -103,7 +103,7 @@ namespace drift
 							return make_variant(true);
 						}) :
 						make_variant([values](const list&)->variant_ptr {
-							return values[0] == values[1];
+							return make_variant(values[0] == values[1]);
 						});
 				else if(oper == "!=")
 					return num_args > 2 ?
@@ -114,7 +114,7 @@ namespace drift
 							return make_variant(true);
 						}) :
 						make_variant([values](const list&)->variant_ptr {
-							return values[0] != values[1];
+							return make_variant(values[0] != values[1]);
 						});
 			}
 			static variant_ptr parse_arith_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)

@@ -17,4 +17,5 @@ interact nicely with c++.
 To come:
 - Tests, tests and tests
 - More robust parsing
+- List manipulation
 - Inequality

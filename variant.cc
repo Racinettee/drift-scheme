@@ -47,7 +47,7 @@ namespace drift
 	variant::incorrect_treatment::incorrect_treatment(kind actual, kind alt) :
 		runtime_error("variant of "s + kind_str(actual) + " treated as: "s + kind_str(alt)) { }
 
-	variant_ptr operator==(variant_ptr l, variant_ptr r)
+	bool operator==(variant_ptr l, variant_ptr r)
 	{
 		switch (l->variant_kind)
 		{
@@ -55,11 +55,11 @@ namespace drift
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_variant(l->value_int == r->value_int);
+				return (l->value_int == r->value_int);
 			case variant::kind::kind_double:
-				return make_variant(l->value_int == r->value_double);
+				return (l->value_int == r->value_double);
 			case variant::kind::kind_string:
-				return make_variant(l->value_int == stoll(r->value_string));
+				return (l->value_int == stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l == r->value_function({});
 			}
@@ -68,16 +68,16 @@ namespace drift
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_variant(l->value_string == to_string(r->value_int));
+				return (l->value_string == to_string(r->value_int));
 			case variant::kind::kind_double:
-				return make_variant(l->value_string == to_string(r->value_double));
+				return (l->value_string == to_string(r->value_double));
 			case variant::kind::kind_string:
-				return make_variant(l->value_string == r->value_string);
+				return (l->value_string == r->value_string);
 			}
 			break;
 		}
 	}
-	variant_ptr operator!=(variant_ptr l, variant_ptr r)
+	bool operator!=(variant_ptr l, variant_ptr r)
 	{
 		switch (l->variant_kind)
 		{
@@ -85,11 +85,11 @@ namespace drift
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_variant(l->value_int != r->value_int);
+				return (l->value_int != r->value_int);
 			case variant::kind::kind_double:
-				return make_variant(l->value_int != r->value_double);
+				return (l->value_int != r->value_double);
 			case variant::kind::kind_string:
-				return make_variant(l->value_int != stoll(r->value_string));
+				return (l->value_int != stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l != r->value_function({});
 			}
@@ -98,11 +98,11 @@ namespace drift
 			switch (r->variant_kind)
 			{
 			case variant::kind::kind_int:
-				return make_variant(l->value_string != to_string(r->value_int));
+				return (l->value_string != to_string(r->value_int));
 			case variant::kind::kind_double:
-				return make_variant(l->value_string != to_string(r->value_double));
+				return (l->value_string != to_string(r->value_double));
 			case variant::kind::kind_string:
-				return make_variant(l->value_string != r->value_string);
+				return (l->value_string != r->value_string);
 			}
 			break;
 		}
