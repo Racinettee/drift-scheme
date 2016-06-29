@@ -82,11 +82,18 @@ int main() try
 	puts("Test that a function returning an atomic returns the correct value");
 	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"s)());
 	puts("Type tests");
-	assert.not_type<drift::string>(context("100000"s));
+	assert.not_type<drift::string>(context("100000"s)); // long long
+	assert.not_type<long long>(context("(+ 1 2 3 4)")); // function
+	assert.is_type<long long>(context("(+ 1 2 3 4)")()); // function call -> long long
 	puts("Return a lambda and see it as function");
 	assert.is_type<drift::function>(context(R"((lambda () "Scheme"))"s));
 	puts("Lambda returned + called in C++ returns string");
 	assert.is_type<drift::string>(context(R"((lambda () "Scheme"))"s)());
+	puts("Feature tests");
+	puts("Lambda defined in context() & prints argument provided by C++:");
+	assert.no_throw([&context](){
+		context("(lambda (msg) (println \"Message from C++: \" msg))")("Hello world... again");
+	});
 }
 catch (exception& e)
 {
