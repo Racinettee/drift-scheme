@@ -56,10 +56,8 @@ public:
 		{
 			fn();
 		}
-		catch(...)
-		{
-			++failed_assertions;
-		}
+		catch(exception& e) { ++failed_assertions; puts(e.what()); }
+		catch(...) { ++failed_assertions; }
 		++run_assertions;
 	}
 private:
@@ -77,7 +75,10 @@ int main() try
 	// Set some data to be used in the script
 	context["x"s] = 100LL;
 	// Load and run the script
+	puts("TEST: Load & Run Schemy file");
 	context.load_file("test.scm");
+
+	puts("TEST: Within C++");
 	// Call a function defined in test.scm
 	context["lam"s]("Jericho Billy"s, "Andrew"s);
 
@@ -85,14 +86,14 @@ int main() try
 	puts("Test empty expressions: '()' expect a warning.");
 	assert.no_throw([&context]() { context("()"); });
 	puts("Test atomic values (expressions that are just literals)");
-	assert.eq(100LL, context("100"s));
-	assert.eq("Hello world"s, context(R"("Hello world")"s));
-	assert.eq(3.1415, context("3.1415"s));
+	assert.equ(100LL, context("100"s));
+	assert.equ("Hello world"s, context(R"("Hello world")"s));
+	assert.equ(3.1415, context("3.1415"s));
 	puts("Test addition and multiplication");
-	assert.eq(10LL, context("(+ 1 2 3 4)"s)());
-	assert.eq(100LL, context("(* 5 5 4)"s)());
+	assert.equ(10LL, context("(+ 1 2 3 4)"s)());
+	assert.equ(100LL, context("(* 5 5 4)"s)());
 	puts("Test that a function returning an atomic returns the correct value");
-	assert.eq("Scheme"s, context(R"((lambda () "Scheme"))"s)());
+	assert.equ("Scheme"s, context(R"((lambda () "Scheme"))"s)());
 	puts("Type tests");
 	assert.not_type<drift::string>(context("100000"s)); // long long
 	assert.not_type<long long>(context("(+ 1 2 3 4)")); // function
@@ -113,11 +114,14 @@ int main() try
 	assert.equ(false, context("(!= 5 5 5 5 5 5)")());
 	puts("Assign a variable to a list");
 	assert.no_throw([&context](){
-		context("(set! ll (list 10 20 30 40))");
+		context("(define ll (list 10 20 30 40))")();
 	});
 	puts("Test the map function");
 	assert.no_throw([&context](){
 		context("(println (map (lambda (x) (* x x)) (list 1 2 3 4)))")();
+	});
+	assert.no_throw([&context](){
+		context("(println (map (lambda (x) (* x x)) ll))")();
 	});
 }
 catch (exception& e)

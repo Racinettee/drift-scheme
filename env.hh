@@ -34,7 +34,7 @@ namespace drift
 				//	return fn->second; //return user_fn.at(name); //(*fn).second;
 				if(parent != nullptr)
 					return parent->lookup(name);
-				throw(name + " evironment could not find identifier.");
+				throw std::out_of_range(name + " evironment could not find identifier.");
 			}
 			void add_function(const string& n, function f);
 		};
