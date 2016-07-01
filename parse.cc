@@ -116,6 +116,7 @@ namespace drift
 						make_variant([values](const list&)->variant_ptr {
 							return make_variant(values[0] != values[1]);
 						});
+				return null();
 			}
 			static variant_ptr parse_arith_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
@@ -157,6 +158,7 @@ namespace drift
 				expect(token_type::RParen, tok_array, pos, " while seeking to end the arguments for a lambda");
 				return args;
 			}
+
 			static variant_ptr parse_kw_expr(const token& first_tok, shared_ptr<method> fn, const token_array& tok_array, size_t& pos)
 			{
 				size_t num_args = 0;
@@ -186,21 +188,11 @@ namespace drift
 						throw invalid_argument(string("Expected 3 arguments, but got ") + to_string(num_args));
 					return make_variant([values](const list&) -> variant_ptr {
 						auto& cond = *values[0];
-						switch(cond.variant_kind)
-						{
-						case variant::kind::kind_function:
-						{
-							auto& value = (cond.value_function({})->value_bool ? values[1] : values[2]);
-							return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
-						}
-						case variant::kind::kind_int: case variant::kind::kind_bool:
-						{
-							auto& value = (cond.value_bool ? values[1] : values[2]);
-							return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
-						}
-						}
-						// Only the explicit value of 0 or false can be used to evaluate false
-						return make_variant(true);
+
+						auto& value = ((cond.variant_kind == variant::kind::kind_function ? cond.value_function({})->value_bool : cond.value_bool)?
+										values[1] : values[2]);
+
+						return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
 					});
 				}
 				else if(command == "define")
