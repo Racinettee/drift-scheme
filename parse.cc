@@ -189,8 +189,9 @@ namespace drift
 					return make_variant([values](const list&) -> variant_ptr {
 						auto& cond = *values[0];
 
-						auto& value = ((cond.variant_kind == variant::kind::kind_function ? cond.value_function({})->value_bool : cond.value_bool)?
-										values[1] : values[2]);
+						auto& value = ((cond.variant_kind == variant::kind::kind_function ?
+											cond.value_function({})->value_bool : cond.value_bool)?
+												values[1] : values[2]);
 
 						return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
 					});

@@ -52,12 +52,20 @@ public:
 	}
 	void no_throw(std::function<void()> fn)
 	{
-		try
-		{
+		try {
 			fn();
 		}
 		catch(exception& e) { ++failed_assertions; puts(e.what()); }
 		catch(...) { ++failed_assertions; }
+		++run_assertions;
+	}
+	void throws(std::function<void()> fn)
+	{
+		try	{
+			fn();
+			++failed_assertions;
+		}
+		catch(...) { }
 		++run_assertions;
 	}
 private:
@@ -83,6 +91,9 @@ int main() try
 	context["lam"s]("Jericho Billy"s, "Andrew"s);
 
 	assertions assert;
+	assert.throws([&context](){
+		context(")");
+	});
 	puts("Test empty expressions: '()' expect a warning.");
 	assert.no_throw([&context]() { context("()"); });
 	puts("Test atomic values (expressions that are just literals)");
@@ -113,15 +124,21 @@ int main() try
 	assert.equ(true, context("(!= 1 2 3 4 5)")());
 	assert.equ(false, context("(!= 5 5 5 5 5 5)")());
 	puts("Assign a variable to a list");
-	assert.no_throw([&context](){
+	assert.no_throw([&context]() {
 		context("(define ll (list 10 20 30 40))")();
 	});
 	puts("Test the map function");
-	assert.no_throw([&context](){
+	assert.no_throw([&context]() {
 		context("(println (map (lambda (x) (* x x)) (list 1 2 3 4)))")();
 	});
-	assert.no_throw([&context](){
+	assert.no_throw([&context]() {
 		context("(println (map (lambda (x) (* x x)) ll))")();
+	});
+	assert.no_throw([&context]() {
+		context("(define cube (lambda (x) (* x x x)))")();
+	});
+	assert.no_throw([&context]() {
+		context("(println (map cube (list 1 2 3 4)))")();
 	});
 }
 catch (exception& e)
