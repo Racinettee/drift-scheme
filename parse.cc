@@ -185,7 +185,7 @@ namespace drift
 				if (command == "if")
 				{
 					if (num_args != 3)
-						throw invalid_argument(string("Expected 3 arguments, but got ") + to_string(num_args));
+						throw invalid_argument("Expected 3 arguments, but got "s + to_string(num_args));
 					return make_variant([values](const list&) -> variant_ptr {
 						auto& cond = *values[0];
 
@@ -199,13 +199,13 @@ namespace drift
 				else if(command == "define")
 				{
 					if (num_args != 2)
-						throw invalid_argument(string("define expects 2 arguments, but got ") + to_string(num_args));
+						throw invalid_argument("define expects 2 arguments, but got "s + to_string(num_args));
 					
 					auto env = fn->env;
 					return make_variant([env, values](const list&) -> variant_ptr {
 						// values[0] should be an identifier, values[1] will be its value
 						if (values[0]->variant_kind != variant::kind_string)
-							throw invalid_argument(string("define expects an identifier as its first arg but got: ") +
+							throw invalid_argument("define expects an identifier as its first arg but got: "s +
 								variant::kind_str(values[0]->variant_kind));
 
 						auto& symbols = env->symbols;
@@ -221,17 +221,17 @@ namespace drift
 				else if (command == "set")
 				{
 					if (num_args != 2)
-						throw invalid_argument(string("set expects 2 arguments, but got ") + to_string(num_args));
+						throw invalid_argument("set expects 2 arguments, but got "s + to_string(num_args));
 
 					return make_variant([fn, values](const list&) -> variant_ptr {
 						auto env = fn->env;
 						if (values[0]->variant_kind != variant::kind_string)
-							throw invalid_argument("set expects an identifier as its first arg but got: " + variant::kind_str(values[0]->variant_kind));
+							throw invalid_argument("set expects an identifier as its first arg but got: "s + variant::kind_str(values[0]->variant_kind));
 
 						auto& symbols = env->symbols;
 						// Assert that the symbol we're setting has been defined
 						if (symbols.find(values[0]->value_string) == symbols.end())
-							throw invalid_argument("set being used on identifier that hasn't been defined: " + values[0]->value_string);
+							throw invalid_argument("set being used on identifier that hasn't been defined: "s + values[0]->value_string);
 
 						return symbols[values[0]->value_string] = (values[1]->variant_kind == variant::kind_function ?
 							values[1]->value_function({}) :  values[1]);
