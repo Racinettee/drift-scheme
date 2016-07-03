@@ -132,6 +132,9 @@ namespace drift
 				catch (out_of_range&) {	}
 				catch (expr_over&) { }
 
+				if(num_args < 2)
+					throw invalid_argument("Error: at least 2 arguments are expected to an arithmetic function, but got: "s + to_string(num_args));
+
 				switch (first_tok.second->value_string[0])
 				{
 				case '+':
@@ -144,6 +147,13 @@ namespace drift
 						auto initial = values.at(0) * values.at(1);
 						for (size_t i = 2; i < values.size(); i++)
 							initial = initial * values[i];
+						return initial;
+					});
+				case '-':
+					return make_variant([values](const list&) {
+						auto initial = values[0] - values[1];
+						for (size_t i = 2; i < values.size(); i++)
+							initial = initial - values[i];
 						return initial;
 					});
 				}
@@ -166,8 +176,8 @@ namespace drift
 				if (command == "set")
 					optional(Not, tok_array, pos);
 				bool will_lookup = !(command == "define" ||
-									command == "set" ||
-									command == "lambda");
+									command == "set");// ||
+									//command == "lambda");
 
 				list arguments;
 				if(command == "lambda")

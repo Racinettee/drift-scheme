@@ -100,9 +100,10 @@ int main() try
 	assert.equ(100LL, context("100"s));
 	assert.equ("Hello world"s, context(R"("Hello world")"s));
 	assert.equ(3.1415, context("3.1415"s));
-	puts("Test addition and multiplication");
+	puts("Test addition, multiplication and subtraction");
 	assert.equ(10LL, context("(+ 1 2 3 4)"s)());
 	assert.equ(100LL, context("(* 5 5 4)"s)());
+	assert.equ(-9LL, context("(- 1 10)"s)());
 	puts("Test that a function returning an atomic returns the correct value");
 	assert.equ("Scheme"s, context(R"((lambda () "Scheme"))"s)());
 	puts("Type tests");
@@ -140,8 +141,20 @@ int main() try
 	assert.no_throw([&context]() {
 		context("(println (map cube (list 1 2 3 4)))")();
 	});
+	context("(define echo (lambda (v) v))")();
+	context("(define iftest (lambda (n) (if (== n 0) 0 1)))")();
+	context("(println (iftest 10))")();
+	context("(println (iftest 1))")();
+	context("(println (iftest (echo 0)))")();
+	context("(println (echo (* 100 100 100)))")();
+	context("(define fact (lambda (n) "
+				"(if (== n 0) 1 (* n (fact (-n 1))))))")();
+
+	context("(println (fact 2))")();
+	return EXIT_SUCCESS;
 }
 catch (exception& e)
 {
 	cerr << e.what() << endl;
+	return EXIT_FAILURE;
 }
