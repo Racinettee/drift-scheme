@@ -243,7 +243,7 @@ namespace drift
 						if (symbols.find(values[0]->value_string) == symbols.end())
 							throw invalid_argument("set being used on identifier that hasn't been defined: "s + values[0]->value_string);
 
-						return symbols[values[0]->value_string] = (values[1]->variant_kind == variant::kind_function ?
+						return symbols.at(values[0]->value_string) = (values[1]->variant_kind == variant::kind_function ?
 							values[1]->value_function({}) :  values[1]);
 					});
 				}

@@ -20,6 +20,7 @@ namespace drift
 			environment* parent = nullptr;
 			variant_ptr& lookup(const string& name) {
 				try {
+					printf("Symbol lookup: %s\n", name.c_str());
 					variant_ptr& sym = symbols.at(name);
 					return sym;
 				} catch(std::out_of_range&) { }

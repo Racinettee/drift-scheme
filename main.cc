@@ -147,10 +147,15 @@ int main() try
 	context("(println (iftest 1))")();
 	context("(println (iftest (echo 0)))")();
 	context("(println (echo (* 100 100 100)))")();
-	context("(define fact (lambda (n) "
-				"(if (== n 0) 1 (* n (fact (-n 1))))))")();
+	
+	context("(define nn 1)")();
+	context("(println (- nn 1)")();
+	context("(println (if (== (- nn 1) 1) \"true\" \"false\"))")();
+	//context("(define fact (lambda (n) "
+				//"(if (== n 0) 1 (* n (fact (- n 1))))))")();
 
-	context("(println (fact 2))")();
+	//context("(println (fact 2))")();
+
 	return EXIT_SUCCESS;
 }
 catch (exception& e)
