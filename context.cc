@@ -3,7 +3,7 @@
 using namespace std;
 namespace drift
 {
-	namespace scheme
+	namespace schemy
 	{
 		context::context(): env(std_env())
 		{

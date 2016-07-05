@@ -75,6 +75,8 @@ namespace drift
 				return (l->value_string == r->value_string);
 			}
 			break;
+		case variant::kind::kind_function:
+			return l->value_function({}) == r;
 		}
 	}
 	bool operator!=(variant_ptr l, variant_ptr r)
@@ -122,6 +124,19 @@ namespace drift
 				return make_variant(l->value_int + stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l + r->value_function({});
+			}
+			break;
+		case variant::kind::kind_double:
+			switch (r->variant_kind)
+			{
+			case variant::kind::kind_int:
+				return make_variant(l->value_double + static_cast<double>(r->value_int));
+			case variant::kind::kind_double:
+				return make_variant(l->value_double + r->value_double);
+			case variant::kind::kind_string:
+				return make_variant(l->value_double + stod(r->value_string));
+			case variant::kind::kind_function:
+				return l - r->value_function({});
 			}
 			break;
 		case variant::kind::kind_string:
@@ -195,6 +210,38 @@ namespace drift
 
 	variant_ptr operator-(variant_ptr l, variant_ptr r)
 	{
+		switch (l->variant_kind)
+		{
+		case variant::kind::kind_int:
+			switch (r->variant_kind)
+			{
+			case variant::kind::kind_int:
+				return make_variant(l->value_int - r->value_int);
+			case variant::kind::kind_double:
+				return make_variant(l->value_int - static_cast<long long>(r->value_double));
+			case variant::kind::kind_string:
+				return make_variant(l->value_int - stoll(r->value_string));
+			case variant::kind::kind_function:
+				return l - r->value_function({});
+			}
+			break;
+		case variant::kind::kind_double:
+			switch (r->variant_kind)
+			{
+			case variant::kind::kind_int:
+				return make_variant(l->value_double - static_cast<double>(r->value_int));
+			case variant::kind::kind_double:
+				return make_variant(l->value_double - r->value_double);
+			case variant::kind::kind_string:
+				return make_variant(l->value_double - stod(r->value_string));
+			case variant::kind::kind_function:
+				return l - r->value_function({});
+			}
+			break;
+		case variant::kind::kind_function:
+				// Recurse to get the function evaluated and eventually get to a concrete value to add
+				return l->value_function({}) - r;
+		}
 		return null();
 	}
 

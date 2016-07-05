@@ -2,7 +2,7 @@
 #include "variant.hh"
 namespace drift
 {
-	namespace scheme
+	namespace schemy
 	{
 		namespace lib
 		{

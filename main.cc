@@ -15,7 +15,7 @@ public:
 		printf("Assertions %s: %lu failed; %lu run;\n", failed_assertions == 0 ?
 			"succeeded" : "failed", failed_assertions, run_assertions);
 	}
-	template<class T> void eq(const T& val, const drift::scheme::selector& res, const string& msg = "")
+	template<class T> void eq(const T& val, const drift::schemy::selector& res, const string& msg = "")
 	{
 		if (val != res.as<T>()) {
 			++failed_assertions;
@@ -23,7 +23,7 @@ public:
 		}
 		++run_assertions;
 	}
-	template<class T> void neq(const T& val, const drift::scheme::selector& res, const string& msg = "")
+	template<class T> void neq(const T& val, const drift::schemy::selector& res, const string& msg = "")
 	{
 		if (val == res.as<T>()) {
 			++failed_assertions;
@@ -31,7 +31,7 @@ public:
 		}
 		++run_assertions;
 	}
-	template<class T> void not_type(const drift::scheme::selector& res)
+	template<class T> void not_type(const drift::schemy::selector& res)
 	{
 		try {
 			res.as<T>();
@@ -40,7 +40,7 @@ public:
 		catch (drift::variant::incorrect_treatment&){ }
 		++run_assertions;
 	}
-	template<class T> void is_type(const drift::scheme::selector& res)
+	template<class T> void is_type(const drift::schemy::selector& res)
 	{
 		try {
 			res.as<T>();
@@ -79,16 +79,16 @@ int main() try
 {
 	using namespace drift;
 	// Create a context
-	scheme::context context;
+	schemy::context context;
 	// Set some data to be used in the script
 	context["x"s] = 100LL;
 	// Load and run the script
 	puts("TEST: Load & Run Schemy file");
-	context.load_file("test.scm");
+	//context.load_file("test.scm");
 
 	puts("TEST: Within C++");
 	// Call a function defined in test.scm
-	context["lam"s]("Jericho Billy"s, "Andrew"s);
+	//context["lam"s]("Jericho Billy"s, "Andrew"s);
 
 	assertions assert;
 	assert.throws([&context](){
@@ -100,9 +100,10 @@ int main() try
 	assert.equ(100LL, context("100"s));
 	assert.equ("Hello world"s, context(R"("Hello world")"s));
 	assert.equ(3.1415, context("3.1415"s));
-	puts("Test addition and multiplication");
+	puts("Test addition, multiplication and subtraction");
 	assert.equ(10LL, context("(+ 1 2 3 4)"s)());
 	assert.equ(100LL, context("(* 5 5 4)"s)());
+	assert.equ(-9LL, context("(- 1 10)"s)());
 	puts("Test that a function returning an atomic returns the correct value");
 	assert.equ("Scheme"s, context(R"((lambda () "Scheme"))"s)());
 	puts("Type tests");
@@ -140,8 +141,20 @@ int main() try
 	assert.no_throw([&context]() {
 		context("(println (map cube (list 1 2 3 4)))")();
 	});
+	context("(define echo (lambda (v) v))")();
+
+	assert.no_throw([&context]()
+	{
+		context("(define fact (lambda (n) "
+					"(if (== n 0) 1 (* n (fact (- n 1))))))")();
+	});
+
+	assert.equ(3628800LL, context("(fact 10)")());
+
+	return EXIT_SUCCESS;
 }
 catch (exception& e)
 {
 	cerr << e.what() << endl;
+	return EXIT_FAILURE;
 }

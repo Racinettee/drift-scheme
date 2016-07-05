@@ -5,7 +5,7 @@
 using namespace std;
 namespace drift
 {
-	namespace scheme
+	namespace schemy
 	{
 		namespace lib
 		{

@@ -4,7 +4,7 @@ using std::string;
 using std::move;
 namespace drift
 {
-	namespace scheme
+	namespace schemy
 	{
 		environment::environment(environment&& env) :
 			symbols(move(env.symbols)), user_fn(move(env.user_fn))
