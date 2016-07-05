@@ -84,11 +84,11 @@ int main() try
 	context["x"s] = 100LL;
 	// Load and run the script
 	puts("TEST: Load & Run Schemy file");
-	context.load_file("test.scm");
+	//context.load_file("test.scm");
 
 	puts("TEST: Within C++");
 	// Call a function defined in test.scm
-	context["lam"s]("Jericho Billy"s, "Andrew"s);
+	//context["lam"s]("Jericho Billy"s, "Andrew"s);
 
 	assertions assert;
 	assert.throws([&context](){
@@ -142,22 +142,14 @@ int main() try
 		context("(println (map cube (list 1 2 3 4)))")();
 	});
 	context("(define echo (lambda (v) v))")();
-	context("(define iftest (lambda (n) (if (== n 0) 0 1)))")();
-	context("(println (iftest 10))")();
-	context("(println (iftest 1))")();
-	context("(println (iftest (echo 0)))")();
-	context("(println (echo (* 100 100 100)))")();
-	
-	context("(define nn 1)")();
-	context("(println (- nn 1)")();
-	context("(println (if (== (- nn 1) 1) \"true\" \"false\"))")();
 
-	//context("(define recurs (lambda (n) (if (== n 3) \"done recursing\" (recurs (+ n 1)))))")();
-	//context("(recurs 0)")();
-	context("(define fact (lambda (n) "
-				"(if (== n 0) 1 (* n (fact (- n 1))))))")();
+	assert.no_throw([&context]()
+	{
+		context("(define fact (lambda (n) "
+					"(if (== n 0) 1 (* n (fact (- n 1))))))")();
+	});
 
-	context("(println (fact 4))")();
+	assert.equ(3628800LL, context("(fact 10)")());
 
 	return EXIT_SUCCESS;
 }
