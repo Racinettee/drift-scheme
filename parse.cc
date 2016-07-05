@@ -7,8 +7,13 @@
 using namespace std;
 namespace drift
 {
-	namespace scheme
+	namespace schemy
 	{
+		variant_ptr identifier_lookup(const list& args, shared_ptr<method> fn, const string& identifier);
+		variant_ptr define(const list& values, environment* env);
+		variant_ptr set(const list& values, shared_ptr<method> fn);
+		variant_ptr lambda(const list& args, list values, shared_ptr<method> fn, list arguments);
+		variant_ptr if_fn(const list& values);
 		namespace
 		{
 			// Thrown if a token was expected but something else was found
@@ -61,10 +66,8 @@ namespace drift
 				{
 					string identifier = tok.second->value_string;
 					// Maybe arguments can be passed down to this function to solve the issue of de-referencing predicates
-					return (lookup_identifiers ? make_variant([fn, identifier](const list& args) {
-						auto found = fn->env->lookup(identifier);
-						return found->variant_kind == variant::kind_function ? found->value_function(args) : found; //return fn->env->lookup(identifier);
-					}) : tok.second);
+					using std::placeholders::_1;
+					return (lookup_identifiers ? make_variant(bind(identifier_lookup, _1, fn, identifier)) : tok.second);
 				}
 				case LParen:
 				{
@@ -196,15 +199,7 @@ namespace drift
 				{
 					if (num_args != 3)
 						throw invalid_argument("Expected 3 arguments, but got "s + to_string(num_args));
-					return make_variant([values](const list&) -> variant_ptr {
-						auto& cond = *values[0];
-
-						auto& value = ((cond.variant_kind == variant::kind::kind_function ?
-											cond.value_function({})->value_bool : cond.value_bool)?
-												values[1] : values[2]);
-
-						return value->variant_kind == variant::kind_function ? value->value_function({}) : value;
-					});
+					return make_variant(bind(if_fn, values));
 				}
 				else if(command == "define")
 				{
@@ -212,73 +207,22 @@ namespace drift
 						throw invalid_argument("define expects 2 arguments, but got "s + to_string(num_args));
 					
 					auto env = fn->env;
-					return make_variant([env, values](const list&) -> variant_ptr {
-						// values[0] should be an identifier, values[1] will be its value
-						if (values[0]->variant_kind != variant::kind_string)
-							throw invalid_argument("define expects an identifier as its first arg but got: "s +
-								variant::kind_str(values[0]->variant_kind));
-
-						auto& symbols = env->symbols;
-						// Assert that the symbol we're defining is not already defined
-						if (symbols.find(values[0]->value_string) != symbols.end())
-							throw invalid_argument(values[0]->value_string + " was already defined");
-
-						auto iter = symbols.emplace(values[0]->value_string, values[1]);
-
-						return iter.first->second;
-					});
+					return make_variant(bind(define, values, env));
 				}
 				else if (command == "set")
 				{
 					if (num_args != 2)
 						throw invalid_argument("set expects 2 arguments, but got "s + to_string(num_args));
 
-					return make_variant([fn, values](const list&) -> variant_ptr {
-						auto env = fn->env;
-						if (values[0]->variant_kind != variant::kind_string)
-							throw invalid_argument("set expects an identifier as its first arg but got: "s + variant::kind_str(values[0]->variant_kind));
-
-						auto& symbols = env->symbols;
-						// Assert that the symbol we're setting has been defined
-						if (symbols.find(values[0]->value_string) == symbols.end())
-							throw invalid_argument("set being used on identifier that hasn't been defined: "s + values[0]->value_string);
-
-						return symbols.at(values[0]->value_string) = (values[1]->variant_kind == variant::kind_function ?
-							values[1]->value_function({}) :  values[1]);
-					});
+					return make_variant(bind(set, values, fn));
 				}
 				else if (command == "lambda")
 				{
 					if (num_args < 1)
 						throw invalid_argument("Lambda requires at least 1 expression");
-					
-					//auto new_env = make_shared<environment>(fn->env);
-					return make_variant([fn, arguments, values](const list& args) -> variant_ptr {
-						environment env(fn->env);
-						environment* original = fn->env;
-						const size_t argsc = args.size();
-						const size_t argumentsc = arguments.size();
-						
-						if(argsc != argumentsc)
-							printf("Warning: Number of arguments passed to lambda do "
-									"not match what it was specified with: %lu vs %lu\n", argsc, argumentsc);
-							
-						for(size_t i = 0UL; i < argsc; i++)
-							env.symbols[arguments[i]->value_string] = args[i];
-						
-						fn->env = &env;
-						
-						for(size_t i = 0; i < values.size()-1; i++)
-							if(values[i]->variant_kind == variant::kind_function)
-								values[i]->value_function({});
-						auto& value = values.back();
-						
-						auto result = (value->variant_kind == variant::kind_function ? value->value_function({}) : value);
-						
-						fn->env = original;
-						
-						return result;
-					});
+
+					using std::placeholders::_1;
+					return make_variant(bind(lambda, _1, values, fn, arguments));
 				}
 				else if (command == "begin")
 				{

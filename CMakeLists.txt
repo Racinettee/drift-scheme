@@ -15,7 +15,8 @@ set(core_files
     parse.cc
     variant.cc
     context.hh
-    context.cc)
+    context.cc
+	schemyfn.cc)
     
 add_executable(drift_scheme_test
     ${core_files}

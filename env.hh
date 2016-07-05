@@ -7,7 +7,7 @@
 
 namespace drift
 {
-	namespace scheme
+	namespace schemy
 	{
 		struct environment
 		{

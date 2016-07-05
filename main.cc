@@ -15,7 +15,7 @@ public:
 		printf("Assertions %s: %lu failed; %lu run;\n", failed_assertions == 0 ?
 			"succeeded" : "failed", failed_assertions, run_assertions);
 	}
-	template<class T> void eq(const T& val, const drift::scheme::selector& res, const string& msg = "")
+	template<class T> void eq(const T& val, const drift::schemy::selector& res, const string& msg = "")
 	{
 		if (val != res.as<T>()) {
 			++failed_assertions;
@@ -23,7 +23,7 @@ public:
 		}
 		++run_assertions;
 	}
-	template<class T> void neq(const T& val, const drift::scheme::selector& res, const string& msg = "")
+	template<class T> void neq(const T& val, const drift::schemy::selector& res, const string& msg = "")
 	{
 		if (val == res.as<T>()) {
 			++failed_assertions;
@@ -31,7 +31,7 @@ public:
 		}
 		++run_assertions;
 	}
-	template<class T> void not_type(const drift::scheme::selector& res)
+	template<class T> void not_type(const drift::schemy::selector& res)
 	{
 		try {
 			res.as<T>();
@@ -40,7 +40,7 @@ public:
 		catch (drift::variant::incorrect_treatment&){ }
 		++run_assertions;
 	}
-	template<class T> void is_type(const drift::scheme::selector& res)
+	template<class T> void is_type(const drift::schemy::selector& res)
 	{
 		try {
 			res.as<T>();
@@ -79,7 +79,7 @@ int main() try
 {
 	using namespace drift;
 	// Create a context
-	scheme::context context;
+	schemy::context context;
 	// Set some data to be used in the script
 	context["x"s] = 100LL;
 	// Load and run the script
@@ -152,7 +152,7 @@ int main() try
 	context("(println (- nn 1)")();
 	context("(println (if (== (- nn 1) 1) \"true\" \"false\"))")();
 	//context("(define fact (lambda (n) "
-				//"(if (== n 0) 1 (* n (fact (- n 1))))))")();
+	//			"(if (== n 0) 1 (* n (fact (- n 1))))))")();
 
 	//context("(println (fact 2))")();
 

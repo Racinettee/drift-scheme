@@ -4,7 +4,7 @@
 #include "variant.hh"
 namespace drift
 {
-    namespace scheme
+    namespace schemy
     {
         class selector
         {
