@@ -52,7 +52,8 @@ namespace drift
 					"not match what it was specified with: %lu vs %lu\n", argsc, argumentsc);
 
 			for (size_t i = 0UL; i < argsc; i++)
-				env.symbols[arguments[i]->value_string] = args[i];
+				// Make sure to resolve any expressions from the upper level scope before setting the new environment to the method object
+				env.symbols[arguments[i]->value_string] = (args[i]->variant_kind == variant::kind_function ? args[i]->value_function({}) : args[i]);
 
 			fn->env = &env;
 

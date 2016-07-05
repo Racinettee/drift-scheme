@@ -151,10 +151,13 @@ int main() try
 	context("(define nn 1)")();
 	context("(println (- nn 1)")();
 	context("(println (if (== (- nn 1) 1) \"true\" \"false\"))")();
-	//context("(define fact (lambda (n) "
-	//			"(if (== n 0) 1 (* n (fact (- n 1))))))")();
 
-	//context("(println (fact 2))")();
+	//context("(define recurs (lambda (n) (if (== n 3) \"done recursing\" (recurs (+ n 1)))))")();
+	//context("(recurs 0)")();
+	context("(define fact (lambda (n) "
+				"(if (== n 0) 1 (* n (fact (- n 1))))))")();
+
+	context("(println (fact 4))")();
 
 	return EXIT_SUCCESS;
 }
