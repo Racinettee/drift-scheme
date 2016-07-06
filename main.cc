@@ -50,13 +50,13 @@ public:
 		}
 		++run_assertions;
 	}
-	void no_throw(std::function<void()> fn)
+	void no_throw(std::function<void()> fn, const std::string& m)
 	{
 		try {
 			fn();
 		}
-		catch(exception& e) { ++failed_assertions; puts(e.what()); }
-		catch(...) { ++failed_assertions; }
+		catch(exception& e) { ++failed_assertions; printf("%s: %s\n", m.c_str(), e.what()); }
+		catch (...) { ++failed_assertions; puts(m.c_str()); }
 		++run_assertions;
 	}
 	void throws(std::function<void()> fn)
@@ -72,8 +72,11 @@ private:
 	std::size_t failed_assertions = 0;
 	std::size_t run_assertions = 0;
 };
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 #define equ(l, r) eq(l, r, #l " == " #r)
 #define nequ(l, r) neq(l, r, #l " != " #r)
+#define nothrow(l) no_throw(l, "No throw assertion at line: " TOSTRING(__LINE__) " threw")
 
 int main() try
 {
@@ -95,7 +98,7 @@ int main() try
 		context(")");
 	});
 	puts("Test empty expressions: '()' expect a warning.");
-	assert.no_throw([&context]() { context("()"); });
+	assert.nothrow([&context]() { context("()"); });
 	puts("Test atomic values (expressions that are just literals)");
 	assert.equ(100LL, context("100"s));
 	assert.equ("Hello world"s, context(R"("Hello world")"s));
@@ -116,7 +119,7 @@ int main() try
 	assert.is_type<drift::string>(context(R"((lambda () "Scheme"))"s)());
 	puts("Feature tests");
 	puts("Lambda defined in context() & prints argument provided by C++:");
-	assert.no_throw([&context](){
+	assert.nothrow([&context](){
 		context("(lambda (msg) (println \"Message from C++: \" msg))")("Hello world... again");
 	});
 	puts("Multiple equality");
@@ -125,25 +128,25 @@ int main() try
 	assert.equ(true, context("(!= 1 2 3 4 5)")());
 	assert.equ(false, context("(!= 5 5 5 5 5 5)")());
 	puts("Assign a variable to a list");
-	assert.no_throw([&context]() {
+	assert.nothrow([&context]() {
 		context("(define ll (list 10 20 30 40))")();
 	});
 	puts("Test the map function");
-	assert.no_throw([&context]() {
+	assert.nothrow([&context]() {
 		context("(println (map (lambda (x) (* x x)) (list 1 2 3 4)))")();
 	});
-	assert.no_throw([&context]() {
+	assert.nothrow([&context]() {
 		context("(println (map (lambda (x) (* x x)) ll))")();
 	});
-	assert.no_throw([&context]() {
+	assert.nothrow([&context]() {
 		context("(define cube (lambda (x) (* x x x)))")();
 	});
-	assert.no_throw([&context]() {
+	assert.nothrow([&context]() {
 		context("(println (map cube (list 1 2 3 4)))")();
 	});
 	context("(define echo (lambda (v) v))")();
 
-	assert.no_throw([&context]()
+	assert.nothrow([&context]()
 	{
 		context("(define fact (lambda (n) "
 					"(if (== n 0) 1 (* n (fact (- n 1))))))")();
