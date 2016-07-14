@@ -26,3 +26,9 @@ set_property(TARGET drift_scheme_test PROPERTY CXX_STANDARD 14)
 
 configure_file(test.scm test.scm COPYONLY)
 configure_file(README.md README.md COPYONLY)
+
+configure_file("env.hh" "${CMAKE_CURRENT_SOURCE_DIR}/drift-schemy/env.hh")
+configure_file("lex.hh" "${CMAKE_CURRENT_SOURCE_DIR}/drift-schemy/lex.hh")
+configure_file("variant.hh" "${CMAKE_CURRENT_SOURCE_DIR}/drift-schemy/variant.hh")
+configure_file("context.hh" "${CMAKE_CURRENT_SOURCE_DIR}/drift-schemy/context.hh")
+configure_file("tokens.hh" "${CMAKE_CURRENT_SOURCE_DIR}/drift-schemy/tokens.hh")
