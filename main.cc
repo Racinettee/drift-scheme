@@ -3,63 +3,17 @@
 #include <iostream>
 #include <numeric>
 #include "context.hh"
-#include "rlutil/rlutil.h"
+
 using namespace std;
 
-
-
-template<class test_sig> class assertions
+class assertions
 {
-	struct unit_test {
-		std::size_t assertions_run = 0ULL;
-		std::size_t assertions_failed = 0ULL;
-		std::string message = "";
-		std::string diagnostic = "";
-		std::function<test_sig> test;
-		unit_test() = default;
-		unit_test(std::function<test_sig> fn, const std::string& msg, const std::string& diag):
-			test(fn), message(msg), diagnostic(diag) { }
-	};
-	std::vector<unit_test> unit_tests;
-	std::unique_ptr<drift::schemy::context> context;
-	std::size_t units_run = 0ULL;
-	std::size_t units_failed = 0ULL;
 public:
 	assertions() = default;
 	~assertions()
 	{
 		printf("Assertions %s: %lu failed; %lu run;\n", failed_assertions == 0 ?
 			"succeeded" : "failed", failed_assertions, run_assertions);
-	}
-
-	void test(std::string msg, std::function<test_sig> unit_test, std::string diag = "")
-	{
-		tests.emplace_back(unit_test, msg, diag);
-	}
-	void setup()
-	{
-		context.reset();
-	}
-	void tear_down()
-	{
-
-	}
-	void run_tests()
-	{
-		for(auto& unit_test : unit_tests)
-		{
-			setup();
-			try {
-				unit_test.test(*context);
-			}
-			catch(exception& e) {
-
-			}
-			catch(...) {
-
-			}
-			tear_down();
-		}
 	}
 	template<class T> void eq(const T& val, const drift::schemy::selector& res, const string& msg = "")
 	{
@@ -132,7 +86,6 @@ int main() try
 	// Set some data to be used in the script
 	context["x"s] = 100LL;
 	// Load and run the script
-	rlutil::setColor(rlutil::YELLOW);
 	puts("TEST: Load & Run Schemy file");
 	//context.load_file("test.scm");
 
