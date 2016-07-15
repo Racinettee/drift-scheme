@@ -62,6 +62,10 @@ namespace drift
 				return (l->value_int == stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l == r->value_function({});
+			case variant::kind::kind_bool:
+				return (static_cast<bool>(l->value_int) == r->value_bool);
+			default:
+				throw invalid_argument("== on currently unsupported type");
 			}
 			break;
 		case variant::kind::kind_string:
@@ -73,10 +77,14 @@ namespace drift
 				return (l->value_string == to_string(r->value_double));
 			case variant::kind::kind_string:
 				return (l->value_string == r->value_string);
+			default:
+				throw invalid_argument("== on currently unsupported type");
 			}
 			break;
 		case variant::kind::kind_function:
 			return l->value_function({}) == r;
+		default:
+			throw invalid_argument("== on currently unsupported type");
 		}
 	}
 	bool operator!=(variant_ptr l, variant_ptr r)
@@ -94,6 +102,8 @@ namespace drift
 				return (l->value_int != stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l != r->value_function({});
+			default:
+				throw invalid_argument("!= on currently unsupported type");
 			}
 			break;
 		case variant::kind::kind_string:
@@ -105,8 +115,12 @@ namespace drift
 				return (l->value_string != to_string(r->value_double));
 			case variant::kind::kind_string:
 				return (l->value_string != r->value_string);
+			default:
+				throw invalid_argument("!= on currently unsupported type");
 			}
 			break;
+		default:
+			throw invalid_argument("== on currently unsupported type");
 		}
 	}
 	variant_ptr operator+(variant_ptr l, variant_ptr r)
@@ -124,6 +138,10 @@ namespace drift
 				return make_variant(l->value_int + stoll(r->value_string));
 			case variant::kind::kind_function:
 				return l + r->value_function({});
+			case variant::kind::kind_bool:
+				return make_variant(l->value_int + static_cast<long long>(r->value_bool));
+			default:
+				throw invalid_argument("+ on currently unsupported type");
 			}
 			break;
 		case variant::kind::kind_double:
@@ -137,6 +155,10 @@ namespace drift
 				return make_variant(l->value_double + stod(r->value_string));
 			case variant::kind::kind_function:
 				return l - r->value_function({});
+			case variant::kind::kind_bool:
+				return make_variant(l->value_double + static_cast<double>(r->value_bool));
+			default:
+				throw invalid_argument("+ on currently unsupported type");
 			}
 			break;
 		case variant::kind::kind_string:
@@ -150,8 +172,10 @@ namespace drift
 				return make_variant(l->value_string + r->value_string);
 			}
 		case variant::kind::kind_function:
-				// Recurse to get the function evaluated and eventually get to a concrete value to add
-				return l->value_function({}) + r;
+			// Recurse to get the function evaluated and eventually get to a concrete value to add
+			return l->value_function({}) + r;
+		default:
+			throw invalid_argument("== on currently unsupported type");			
 		}
 		return null();
 	}
